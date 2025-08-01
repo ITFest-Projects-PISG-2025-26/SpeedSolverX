@@ -34,6 +34,7 @@ class CubeSolver {
         this.camera = null;
         this.cameraStream = null;
         this.cube3DViewer = null;
+        this.live3DViewer = null;
         
         this.init();
     }
@@ -43,6 +44,11 @@ class CubeSolver {
         this.generateCubeFace();
         this.updateFaceDisplay();
         this.updateProgressIndicator();
+        
+        // Initialize live 3D viewer since visual input is default
+        setTimeout(() => {
+            this.initLive3DViewer();
+        }, 100);
     }
 
     setupEventListeners() {
@@ -149,6 +155,11 @@ class CubeSolver {
             this.init3DViewer();
         } else {
             document.getElementById(`${method}InputSection`).classList.add('active');
+            
+            // Initialize live 3D viewer for visual input
+            if (method === 'visual') {
+                this.initLive3DViewer();
+            }
         }
 
         // Stop camera if switching away from camera
@@ -182,10 +193,53 @@ class CubeSolver {
         }
     }
 
+    initLive3DViewer() {
+        console.log('initLive3DViewer called');
+        if (!this.live3DViewer) {
+            const container = document.getElementById('live3DViewer');
+            console.log('Live 3D container element:', container);
+            
+            if (container && window.THREE && typeof Cube3DViewer !== 'undefined') {
+                console.log('Creating new Live Cube3DViewer');
+                this.live3DViewer = new Cube3DViewer(container);
+                this.updateLive3DView();
+                
+                // Add reset button functionality
+                const resetBtn = document.getElementById('resetLiveViewBtn');
+                if (resetBtn) {
+                    resetBtn.addEventListener('click', () => {
+                        if (this.live3DViewer) {
+                            this.live3DViewer.resetView();
+                        }
+                    });
+                }
+            } else {
+                console.error('Missing dependencies for live 3D viewer:', {
+                    container: !!container,
+                    THREE: !!window.THREE,
+                    Cube3DViewer: typeof Cube3DViewer !== 'undefined'
+                });
+            }
+        } else {
+            console.log('Live 3D viewer already exists, updating view');
+            this.updateLive3DView();
+        }
+    }
+
+    updateLive3DView() {
+        if (this.live3DViewer) {
+            this.live3DViewer.updateCubeState(this.cubeState);
+        }
+    }
+
     update3DView() {
+        // Update main 3D viewer
         if (this.cube3DViewer) {
             this.cube3DViewer.updateCubeState(this.cubeState);
         }
+        
+        // Update live 3D viewer
+        this.updateLive3DView();
     }
 
     selectColor(color) {

@@ -2347,3 +2347,99 @@ input:checked + .slider:before {
 .dark-mode .notification-box.manual-save {
     background: linear-gradient(135deg, #42a5f5, #2196f3);
 }
+
+/* Live 3D Viewer Styles */
+.visual-input-container {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+}
+
+.visual-input-left {
+    flex: 1;
+    min-width: 0;
+}
+
+.visual-input-right {
+    flex: 0 0 400px;
+    max-width: 400px;
+}
+
+.live-3d-viewer {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.live-3d-viewer h4 {
+    margin: 0 0 1rem 0;
+    color: #333;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.live-threed-viewer {
+    width: 100%;
+    height: 300px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.05);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    margin-bottom: 1rem;
+}
+
+.live-3d-viewer .viewer-controls {
+    text-align: center;
+}
+
+.live-3d-viewer .viewer-controls p {
+    margin: 0.25rem 0;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.live-3d-viewer .btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+}
+
+/* Dark mode support for live 3D viewer */
+.dark-mode .live-3d-viewer {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode .live-3d-viewer h4 {
+    color: #fff;
+}
+
+.dark-mode .live-threed-viewer {
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode .live-3d-viewer .viewer-controls p {
+    color: #ccc;
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 1200px) {
+    .visual-input-container {
+        flex-direction: column;
+    }
+    
+    .visual-input-right {
+        flex: none;
+        max-width: none;
+        width: 100%;
+    }
+    
+    .live-threed-viewer {
+        height: 250px;
+    }
+}
