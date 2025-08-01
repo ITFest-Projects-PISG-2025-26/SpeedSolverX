@@ -30,9 +30,6 @@ class CubeSolver {
             red: '#cc0000',
             orange: '#ff6600'
         };
-
-        this.cube3DViewer = null;
-        this.live3DViewer = null;
         
         this.init();
     }
@@ -42,27 +39,10 @@ class CubeSolver {
         this.generateCubeFace();
         this.updateFaceDisplay();
         this.updateProgressIndicator();
-        
-        // Initialize live 3D viewer since visual input is default
-        setTimeout(() => {
-            this.initLive3DViewer();
-        }, 100);
     }
 
     setupEventListeners() {
         try {
-            // Input method switching
-            const visualBtn = document.getElementById('visualInputBtn');
-            const view3DBtn = document.getElementById('view3DBtn');
-            
-            if (visualBtn) visualBtn.addEventListener('click', () => this.switchInputMethod('visual'));
-            if (view3DBtn) {
-                view3DBtn.addEventListener('click', () => {
-                    console.log('3D View button clicked!');
-                    this.switchInputMethod('threeD');
-                });
-            }
-
             // Color palette
             document.querySelectorAll('.color-option').forEach(option => {
                 option.addEventListener('click', (e) => this.selectColor(e.target.dataset.color));
@@ -92,123 +72,9 @@ class CubeSolver {
             if (newSolveBtn) {
                 newSolveBtn.addEventListener('click', () => this.newSolve());
             }
-
-            // 3D viewer controls
-            const resetViewBtn = document.getElementById('resetViewBtn');
-            if (resetViewBtn) {
-                resetViewBtn.addEventListener('click', () => {
-                    if (this.cube3DViewer) {
-                        this.cube3DViewer.resetView();
-                    }
-                });
-            }
         } catch (error) {
             console.error('Error setting up event listeners:', error);
         }
-    }
-
-    switchInputMethod(method) {
-        console.log('Switching input method to:', method);
-        
-        // Update button states
-        document.querySelectorAll('.method-btn').forEach(btn => btn.classList.remove('active'));
-        
-        if (method === 'threeD') {
-            document.getElementById('view3DBtn').classList.add('active');
-        } else {
-            document.getElementById(`${method}InputBtn`).classList.add('active');
-        }
-
-        // Show/hide sections
-        document.querySelectorAll('.input-section').forEach(section => section.classList.remove('active'));
-        
-        if (method === 'threeD') {
-            const threeDSection = document.getElementById('threeDViewSection');
-            console.log('3D section element:', threeDSection);
-            threeDSection.classList.add('active');
-            this.init3DViewer();
-        } else {
-            document.getElementById(`${method}InputSection`).classList.add('active');
-            
-            // Initialize live 3D viewer for visual input
-            if (method === 'visual') {
-                this.initLive3DViewer();
-            }
-        }
-    }
-
-    init3DViewer() {
-        console.log('init3DViewer called');
-        if (!this.cube3DViewer) {
-            const container = document.getElementById('threeDViewer');
-            console.log('3D container element:', container);
-            console.log('THREE.js available:', !!window.THREE);
-            console.log('Cube3DViewer available:', typeof Cube3DViewer);
-            
-            if (container && window.THREE && typeof Cube3DViewer !== 'undefined') {
-                console.log('Creating new Cube3DViewer');
-                this.cube3DViewer = new Cube3DViewer(container);
-                this.update3DView();
-            } else {
-                console.error('Missing dependencies:', {
-                    container: !!container,
-                    THREE: !!window.THREE,
-                    Cube3DViewer: typeof Cube3DViewer !== 'undefined'
-                });
-            }
-        } else {
-            console.log('3D viewer already exists, updating view');
-            this.update3DView();
-        }
-    }
-
-    initLive3DViewer() {
-        console.log('initLive3DViewer called');
-        if (!this.live3DViewer) {
-            const container = document.getElementById('live3DViewer');
-            console.log('Live 3D container element:', container);
-            
-            if (container && window.THREE && typeof Cube3DViewer !== 'undefined') {
-                console.log('Creating new Live Cube3DViewer');
-                this.live3DViewer = new Cube3DViewer(container);
-                this.updateLive3DView();
-                
-                // Add reset button functionality
-                const resetBtn = document.getElementById('resetLiveViewBtn');
-                if (resetBtn) {
-                    resetBtn.addEventListener('click', () => {
-                        if (this.live3DViewer) {
-                            this.live3DViewer.resetView();
-                        }
-                    });
-                }
-            } else {
-                console.error('Missing dependencies for live 3D viewer:', {
-                    container: !!container,
-                    THREE: !!window.THREE,
-                    Cube3DViewer: typeof Cube3DViewer !== 'undefined'
-                });
-            }
-        } else {
-            console.log('Live 3D viewer already exists, updating view');
-            this.updateLive3DView();
-        }
-    }
-
-    updateLive3DView() {
-        if (this.live3DViewer) {
-            this.live3DViewer.updateCubeState(this.cubeState);
-        }
-    }
-
-    update3DView() {
-        // Update main 3D viewer
-        if (this.cube3DViewer) {
-            this.cube3DViewer.updateCubeState(this.cubeState);
-        }
-        
-        // Update live 3D viewer
-        this.updateLive3DView();
     }
 
     selectColor(color) {
@@ -259,9 +125,6 @@ class CubeSolver {
         // Add visual feedback
         square.classList.add('square-updated');
         setTimeout(() => square.classList.remove('square-updated'), 300);
-        
-        // Update 3D view
-        this.update3DView();
     }
 
     updateFaceDisplay() {
@@ -327,7 +190,6 @@ class CubeSolver {
             console.log('Moving to face:', this.currentFaceIndex);
             this.updateFaceDisplay();
             this.updateProgressIndicator();
-            this.update3DView();
         } else {
             console.log('Already at first face');
         }
@@ -340,7 +202,6 @@ class CubeSolver {
             console.log('Moving to face:', this.currentFaceIndex);
             this.updateFaceDisplay();
             this.updateProgressIndicator();
-            this.update3DView();
         } else {
             console.log('Already at last face');
         }
@@ -359,7 +220,6 @@ class CubeSolver {
         }
         
         this.updateFaceDisplay();
-        this.update3DView();
     }
 
     async solveCube() {
@@ -451,13 +311,9 @@ class CubeSolver {
         this.currentFaceIndex = 0;
         this.updateFaceDisplay();
         this.updateProgressIndicator();
-        this.update3DView();
         
         // Hide solution
         document.getElementById('solutionSection').style.display = 'none';
-        
-        // Switch back to visual input
-        this.switchInputMethod('visual');
     }
 }
 
