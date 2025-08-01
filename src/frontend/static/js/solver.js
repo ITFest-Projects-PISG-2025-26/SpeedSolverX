@@ -256,8 +256,8 @@ class CubeSolver {
             });
             
             if (response.ok) {
-                const result = await response.text();
-                this.displaySolution(result);
+                const result = await response.json();
+                this.displaySolution(result.solution);
             } else {
                 const errorText = await response.text();
                 throw new Error(`Server error: ${response.status} - ${errorText}`);
@@ -301,20 +301,23 @@ class CubeSolver {
         return cubeString;
     }
 
-    displaySolution(solutionHtml) {
-        // Parse solution from HTML response
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(solutionHtml, 'text/html');
-        const solutionElement = doc.querySelector('.solution-display');
+    displaySolution(solutionText) {
+        // Display the solution text directly
+        const solutionDisplay = document.getElementById('solutionDisplay');
+        const solutionSection = document.getElementById('solutionSection');
         
-        if (solutionElement) {
-            document.getElementById('solutionDisplay').innerHTML = solutionElement.innerHTML;
-            document.getElementById('solutionSection').style.display = 'block';
+        if (solutionText && solutionText.trim()) {
+            // Format the solution nicely
+            solutionDisplay.innerHTML = `<pre class="solution-moves">${solutionText}</pre>`;
+            solutionSection.style.display = 'block';
             
             // Scroll to solution
-            document.getElementById('solutionSection').scrollIntoView({ 
+            solutionSection.scrollIntoView({ 
                 behavior: 'smooth' 
             });
+        } else {
+            solutionDisplay.innerHTML = '<p class="error">No solution could be generated. Please check your cube configuration.</p>';
+            solutionSection.style.display = 'block';
         }
     }
 
