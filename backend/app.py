@@ -71,7 +71,7 @@ def get_scramble():
 def solve_cube():
     cube = request.form.get('cube')
     solution = solve(cube)
-    return render_template('home.html', solution=solution)
+    return render_template('solver.html', solution=solution)
 
 @app.route('/api/solve', methods=['POST'])
 @login_required

@@ -33,6 +33,16 @@ body {
     align-items: center;
 }
 
+.nav-title-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+.nav-title-link:hover .nav-title {
+    transform: scale(1.05);
+    transition: transform 0.2s ease;
+}
+
 .nav-title {
     font-size: 1.8rem;
     font-weight: bold;
@@ -40,6 +50,7 @@ body {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    transition: transform 0.2s ease;
 }
 
 .nav-user {

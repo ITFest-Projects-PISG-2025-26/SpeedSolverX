@@ -10,10 +10,11 @@
 <body>
     <nav class="navbar">
         <div class="nav-container">
-            <h1 class="nav-title">SpeedSolverX</h1>
+            <a href="/" class="nav-title-link">
+                <h1 class="nav-title">SpeedSolverX</h1>
+            </a>
             <div class="nav-user">
                 <span>Welcome, {{ current_user.id }}!</span>
-                <a href="/" class="nav-link"><i class="fas fa-home"></i> Home</a>
                 <a href="/timer" class="nav-link"><i class="fas fa-stopwatch"></i> Timer</a>
                 <a href="/stats" class="nav-link"><i class="fas fa-chart-line"></i> Stats</a>
                 <a href="/settings" class="nav-link"><i class="fas fa-cog"></i> Settings</a>
