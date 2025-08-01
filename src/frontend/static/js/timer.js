@@ -2,8 +2,8 @@ class CubingTimer {
     constructor() {
         this.startTime = null;
         this.interval = null;
-        this.inspectionInterval = null;
-        this.inspectionTime = 15;
+        this.settings.inspectionInterval = null;
+        this.settings.inspectionTime = 15;
         this.currentScramble = '';
         this.solves = JSON.parse(localStorage.getItem('recentSolves') || '[]');
         this.isRunning = false;
@@ -11,24 +11,43 @@ class CubingTimer {
         this.keyPressed = false;
         this.holdTimer = null;
         
-        // Default configuration (no longer configurable)
-        this.inspection = false;
-        this.autoScramble = true;
-        this.sound = false;
-        this.holdToStart = true;
-        this.scrambleLength = 20;
-        this.cubeType = '3x3';
-        this.hideScramble = false;
-        this.milliseconds = false;
+        // Settings integration
+        this.settings = {
+            inspection: false,
+            autoScramble: true,
+            sound: false,
+            holdToStart: true,
+            scrambleLength: 20,
+            cubeType: '3x3',
+            hideScramble: false,
+            milliseconds: false
+        };
         
+        this.loadSettings();
         this.initializeElements();
         this.bindEvents();
         this.loadRecentSolves();
     }
     
+    loadSettings() {
+        if (window.globalSettings) {
+            this.settings = window.globalSettings.getAllSettings();
+        } else {
+            // Fallback to localStorage
+            const saved = localStorage.getItem('speedsolverx_settings');
+            if (saved) {
+                try {
+                    this.settings = { ...this.settings, ...JSON.parse(saved) };
+                } catch (e) {
+                    console.error('Failed to load settings:', e);
+                }
+            }
+        }
+    }
+    
     initializeElements() {
         this.timerElement = document.getElementById('timer');
-        this.inspectionElement = document.getElementById('inspectionTimer');
+        this.settings.inspectionElement = document.getElementById('inspectionTimer');
         this.scrambleElement = document.getElementById('scrambleDisplay');
         this.newScrambleBtn = document.getElementById('newScrambleBtn');
         this.resetBtn = document.getElementById('resetBtn');
@@ -65,9 +84,9 @@ class CubingTimer {
                 this.startMainTimer();
             } else {
                 // Start hold timer for reset/start
-                if (this.holdToStart) {
+                if (this.settings.holdToStart) {
                     this.holdTimer = setTimeout(() => {
-                        if (this.inspection) {
+                        if (this.settings.inspection) {
                             this.startInspection();
                         } else {
                             this.startMainTimer();
@@ -76,7 +95,7 @@ class CubingTimer {
                     
                     this.timerElement.style.color = '#f39c12';
                 } else {
-                    if (this.inspection) {
+                    if (this.settings.inspection) {
                         this.startInspection();
                     } else {
                         this.startMainTimer();
@@ -104,24 +123,24 @@ class CubingTimer {
     
     startInspection() {
         this.isInspecting = true;
-        this.inspectionTime = 15;
-        this.inspectionElement.style.display = 'block';
-        this.inspectionElement.textContent = this.inspectionTime;
+        this.settings.inspectionTime = 15;
+        this.settings.inspectionElement.style.display = 'block';
+        this.settings.inspectionElement.textContent = this.settings.inspectionTime;
         this.timerElement.classList.add('inspection');
         
-        if (this.hideScramble) {
+        if (this.settings.hideScramble) {
             this.scrambleElement.style.opacity = '0.3';
         }
         
-        this.inspectionInterval = setInterval(() => {
-            this.inspectionTime--;
-            this.inspectionElement.textContent = this.inspectionTime;
+        this.settings.inspectionInterval = setInterval(() => {
+            this.settings.inspectionTime--;
+            this.settings.inspectionElement.textContent = this.settings.inspectionTime;
             
-            if (this.inspectionTime <= 0) {
+            if (this.settings.inspectionTime <= 0) {
                 // Auto-start timer and apply DNF
-                clearInterval(this.inspectionInterval);
+                clearInterval(this.settings.inspectionInterval);
                 this.isInspecting = false;
-                this.inspectionElement.style.display = 'none';
+                this.settings.inspectionElement.style.display = 'none';
                 this.timerElement.classList.remove('inspection');
                 
                 // Start the main timer automatically
@@ -131,13 +150,13 @@ class CubingTimer {
                 this.currentPenalty = 'dnf';
                 this.timerElement.classList.add('dnf');
                 
-                if (this.sound) {
+                if (this.settings.sound) {
                     this.playSound('error');
                 }
-            } else if (this.inspectionTime <= 3) {
+            } else if (this.settings.inspectionTime <= 3) {
                 // Warning for last 3 seconds
-                this.inspectionElement.style.color = '#e74c3c';
-                if (this.sound) {
+                this.settings.inspectionElement.style.color = '#e74c3c';
+                if (this.settings.sound) {
                     this.playSound('warning');
                 }
             }
@@ -146,12 +165,12 @@ class CubingTimer {
     
     startMainTimer() {
         if (this.isInspecting) {
-            clearInterval(this.inspectionInterval);
-            this.inspectionElement.style.display = 'none';
+            clearInterval(this.settings.inspectionInterval);
+            this.settings.inspectionElement.style.display = 'none';
             this.isInspecting = false;
             this.timerElement.classList.remove('inspection');
             
-            if (this.hideScramble) {
+            if (this.settings.hideScramble) {
                 this.scrambleElement.style.opacity = '0.1';
             }
         }
@@ -160,13 +179,13 @@ class CubingTimer {
         this.startTime = Date.now();
         this.timerElement.classList.add('running');
         
-        if (this.sound) {
+        if (this.settings.sound) {
             this.playSound('start');
         }
         
         this.interval = setInterval(() => {
             const elapsed = (Date.now() - this.startTime) / 1000;
-            const precision = this.milliseconds ? 3 : 2;
+            const precision = this.settings.milliseconds ? 3 : 2;
             this.timerElement.textContent = elapsed.toFixed(precision);
         }, 10);
     }
@@ -180,39 +199,39 @@ class CubingTimer {
         const finalTime = (Date.now() - this.startTime) / 1000;
         this.timerElement.classList.remove('running');
         
-        if (this.hideScramble) {
+        if (this.settings.hideScramble) {
             this.scrambleElement.style.opacity = '1';
         }
         
-        if (this.sound) {
+        if (this.settings.sound) {
             this.playSound('stop');
         }
         
         // Apply inspection penalty if applicable
         let penalty = null;
-        if (this.inspection && this.inspectionTime <= 0 && this.inspectionTime > -2) {
+        if (this.settings.inspection && this.settings.inspectionTime <= 0 && this.settings.inspectionTime > -2) {
             penalty = 'plus2';
         }
         
         this.recordSolve(finalTime, penalty);
         
-        if (this.autoScramble) {
+        if (this.settings.autoScramble) {
             this.generateNewScramble();
         }
     }
     
     resetTimer() {
         clearInterval(this.interval);
-        clearInterval(this.inspectionInterval);
+        clearInterval(this.settings.inspectionInterval);
         
         this.isRunning = false;
         this.isInspecting = false;
-        this.inspectionTime = 15;
+        this.settings.inspectionTime = 15;
         
         this.timerElement.textContent = '0.00';
         this.timerElement.className = 'timer';
-        this.inspectionElement.style.display = 'none';
-        this.inspectionElement.style.color = '#e74c3c';
+        this.settings.inspectionElement.style.display = 'none';
+        this.settings.inspectionElement.style.color = '#e74c3c';
         
         if (this.scrambleElement) {
             this.scrambleElement.style.opacity = '1';
@@ -238,7 +257,7 @@ class CubingTimer {
         const scramble = [];
         let lastMove = null;
         
-        const length = this.scrambleLength || 20;
+        const length = this.settings.scrambleLength || 20;
         
         for (let i = 0; i < length; i++) {
             let move = moves[Math.floor(Math.random() * moves.length)];
