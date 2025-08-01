@@ -108,12 +108,74 @@ class GlobalSettings {
         
         this.applyGlobalSettings();
         
+        // Show notification for setting change
+        this.showSettingNotification(key, value);
+        
         // Notify other pages of settings change
         window.dispatchEvent(new CustomEvent('settingsChanged', {
             detail: { key, value, allSettings: this.settings }
         }));
         
         console.log('Settings change event dispatched');
+    }
+    
+    showSettingNotification(key, value) {
+        // Format the setting name nicely
+        const settingName = key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1');
+        const status = typeof value === 'boolean' ? (value ? 'enabled' : 'disabled') : `set to ${value}`;
+        const message = `${settingName} ${status}`;
+        
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = 'settings-saved-notification';
+        notification.innerHTML = `
+            <i class="fas fa-check-circle"></i>
+            <span>${message}</span>
+        `;
+        
+        // Add styles for the notification
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4CAF50;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            transform: translateX(100%);
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            opacity: 0;
+        `;
+        
+        // Add to page
+        document.body.appendChild(notification);
+        
+        // Animate in
+        setTimeout(() => {
+            notification.style.transform = 'translateX(0)';
+            notification.style.opacity = '1';
+        }, 100);
+        
+        // Auto remove after 3 seconds
+        setTimeout(() => {
+            notification.style.transform = 'translateX(100%)';
+            notification.style.opacity = '0';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 300);
+        }, 3000);
+        
+        console.log(`Setting notification shown: ${message}`);
     }
     
     // Method to force refresh settings (useful when switching pages)
