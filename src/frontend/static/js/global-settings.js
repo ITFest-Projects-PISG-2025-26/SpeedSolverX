@@ -8,7 +8,6 @@ class GlobalSettings {
             holdToStart: true,
             darkMode: true,
             largeTimer: true,
-            milliseconds: true,
             hideScramble: false,
             realtimeStats: true,
             pbNotifications: true,
@@ -122,12 +121,6 @@ class GlobalSettings {
         
         try {
             // Apply other visual preferences
-            if (this.settings.milliseconds) {
-                document.body.classList.add('show-milliseconds');
-            } else {
-                document.body.classList.remove('show-milliseconds');
-            }
-            
             if (this.settings.hideScramble) {
                 document.body.classList.add('hide-scramble');
             } else {

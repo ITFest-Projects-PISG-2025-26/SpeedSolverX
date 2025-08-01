@@ -127,7 +127,6 @@ class SettingsManager {
             holdToStartToggle: document.getElementById('holdToStartToggle'),
             darkModeToggle: document.getElementById('darkModeToggle'),
             largeTimerToggle: document.getElementById('largeTimerToggle'),
-            millisecondsToggle: document.getElementById('millisecondsToggle'),
             hideScrambleToggle: document.getElementById('hideScrambleToggle'),
             realtimeStatsToggle: document.getElementById('realtimeStatsToggle'),
             pbNotificationsToggle: document.getElementById('pbNotificationsToggle'),
