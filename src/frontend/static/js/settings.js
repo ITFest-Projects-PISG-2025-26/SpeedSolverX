@@ -177,52 +177,37 @@ class SettingsManager {
                 });
             }
             
-            // Button events
-            if (this.elements.exportDataBtn) {
-                console.log('Binding export data button');
-                this.elements.exportDataBtn.addEventListener('click', (e) => {
-                    console.log('Export data button clicked');
-                    e.preventDefault();
-                    this.addButtonClickFeedback(e.target);
-                    this.exportData();
-                });
-            }
-            if (this.elements.importDataBtn) {
-                console.log('Binding import data button');
-                this.elements.importDataBtn.addEventListener('click', (e) => {
-                    console.log('Import data button clicked');
-                    e.preventDefault();
-                    this.addButtonClickFeedback(e.target);
-                    this.importData();
-                });
-            }
-            if (this.elements.clearStatsBtn) {
-                console.log('Binding clear stats button');
-                this.elements.clearStatsBtn.addEventListener('click', (e) => {
-                    console.log('Clear stats button clicked');
-                    e.preventDefault();
-                    this.addButtonClickFeedback(e.target);
-                    this.clearStats();
-                });
-            }
-            if (this.elements.resetSettingsBtn) {
-                console.log('Binding reset settings button');
-                this.elements.resetSettingsBtn.addEventListener('click', (e) => {
-                    console.log('Reset settings button clicked');
-                    e.preventDefault();
-                    this.addButtonClickFeedback(e.target);
-                    this.resetSettings();
-                });
-            }
-            if (this.elements.saveSettingsBtn) {
-                console.log('Binding save settings button');
-                this.elements.saveSettingsBtn.addEventListener('click', (e) => {
-                    console.log('Save settings button clicked');
-                    e.preventDefault();
-                    this.addButtonClickFeedback(e.target);
-                    this.saveSettings();
-                });
-            }
+            // Button events with robust error handling
+            const buttons = [
+                { element: 'exportDataBtn', handler: 'exportData', name: 'Export Data' },
+                { element: 'importDataBtn', handler: 'importData', name: 'Import Data' },
+                { element: 'clearStatsBtn', handler: 'clearStats', name: 'Clear Stats' },
+                { element: 'resetSettingsBtn', handler: 'resetSettings', name: 'Reset Settings' },
+                { element: 'saveSettingsBtn', handler: 'saveSettings', name: 'Save Settings' }
+            ];
+
+            buttons.forEach(button => {
+                const element = this.elements[button.element];
+                if (element) {
+                    console.log(`✅ Binding ${button.name} button - element found`);
+                    element.addEventListener('click', (e) => {
+                        console.log(`🔥 ${button.name} button clicked!`);
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        try {
+                            this.addButtonClickFeedback(e.target);
+                            this[button.handler]();
+                            console.log(`✅ ${button.name} handler executed successfully`);
+                        } catch (error) {
+                            console.error(`❌ Error executing ${button.name}:`, error);
+                            this.showNotification(`Error: ${button.name} failed. Check console for details.`, 'error');
+                        }
+                    });
+                } else {
+                    console.error(`❌ ${button.name} button element not found: ${button.element}`);
+                }
+            });
             
             console.log('Settings event listeners bound successfully');
         } catch (error) {
@@ -655,6 +640,21 @@ class SettingsManager {
         }, 150);
     }
     
+    // Debug function to test if settings manager is working
+    testDataManagement() {
+        console.log('🧪 Testing Data Management Functions...');
+        console.log('Settings Manager Instance:', this);
+        console.log('Elements:', this.elements);
+        console.log('Export Data Button:', this.elements.exportDataBtn);
+        console.log('Import Data Button:', this.elements.importDataBtn);
+        console.log('Clear Stats Button:', this.elements.clearStatsBtn);
+        console.log('Reset Settings Button:', this.elements.resetSettingsBtn);
+        console.log('Save Settings Button:', this.elements.saveSettingsBtn);
+        
+        // Test notification system
+        this.showNotification('Data Management Test - All systems working!', 'success');
+    }
+    
     // Public methods for other components
     getSetting(key) {
         return this.settings[key];
@@ -670,8 +670,39 @@ if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         console.log('DOM loaded, creating SettingsManager');
         window.settingsManager = new SettingsManager();
+        
+        // Add global test function for debugging
+        window.testDataManagement = () => {
+            if (window.settingsManager) {
+                window.settingsManager.testDataManagement();
+            } else {
+                console.error('❌ Settings Manager not found!');
+            }
+        };
+        
+        // Add individual button test functions
+        window.testExport = () => window.settingsManager?.exportData();
+        window.testImport = () => window.settingsManager?.importData();
+        window.testClear = () => window.settingsManager?.clearStats();
+        window.testReset = () => window.settingsManager?.resetSettings();
+        window.testSave = () => window.settingsManager?.saveSettings();
     });
 } else {
     console.log('DOM already loaded, creating SettingsManager immediately');
     window.settingsManager = new SettingsManager();
+    
+    // Add global test functions
+    window.testDataManagement = () => {
+        if (window.settingsManager) {
+            window.settingsManager.testDataManagement();
+        } else {
+            console.error('❌ Settings Manager not found!');
+        }
+    };
+    
+    window.testExport = () => window.settingsManager?.exportData();
+    window.testImport = () => window.settingsManager?.importData();
+    window.testClear = () => window.settingsManager?.clearStats();
+    window.testReset = () => window.settingsManager?.resetSettings();
+    window.testSave = () => window.settingsManager?.saveSettings();
 }
