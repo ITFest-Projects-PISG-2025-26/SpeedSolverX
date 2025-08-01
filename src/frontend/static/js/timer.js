@@ -135,21 +135,27 @@ class CubingTimer {
             this.inspectionElement.textContent = this.inspectionTime;
             
             if (this.inspectionTime <= 0) {
-                this.inspectionElement.textContent = '+2';
-                this.inspectionElement.style.color = '#e74c3c';
+                // Auto-start timer and apply DNF
+                clearInterval(this.inspectionInterval);
+                this.isInspecting = false;
+                this.inspectionElement.style.display = 'none';
+                this.timerElement.classList.remove('inspection');
                 
-                if (this.settings.sound) {
-                    this.playSound('warning');
-                }
-            }
-            
-            if (this.inspectionTime <= -2) {
-                this.inspectionElement.textContent = 'DNF';
-                this.applyPenalty('dnf');
-                this.resetTimer();
+                // Start the main timer automatically
+                this.startMainTimer();
+                
+                // Mark as DNF for exceeding inspection time
+                this.currentPenalty = 'dnf';
+                this.timerElement.classList.add('dnf');
                 
                 if (this.settings.sound) {
                     this.playSound('error');
+                }
+            } else if (this.inspectionTime <= 3) {
+                // Warning for last 3 seconds
+                this.inspectionElement.style.color = '#e74c3c';
+                if (this.settings.sound) {
+                    this.playSound('warning');
                 }
             }
         }, 1000);

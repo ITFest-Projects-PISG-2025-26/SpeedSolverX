@@ -33,6 +33,7 @@ class CubeSolver {
 
         this.camera = null;
         this.cameraStream = null;
+        this.cube3DViewer = null;
         
         this.init();
     }
@@ -48,6 +49,7 @@ class CubeSolver {
         // Input method switching
         document.getElementById('visualInputBtn').addEventListener('click', () => this.switchInputMethod('visual'));
         document.getElementById('cameraInputBtn').addEventListener('click', () => this.switchInputMethod('camera'));
+        document.getElementById('view3DBtn').addEventListener('click', () => this.switchInputMethod('threeD'));
 
         // Color palette
         document.querySelectorAll('.color-option').forEach(option => {
@@ -59,7 +61,6 @@ class CubeSolver {
         document.getElementById('nextFaceBtn').addEventListener('click', () => this.nextFace());
 
         // Control buttons
-        document.getElementById('loadScrambleBtn').addEventListener('click', () => this.loadValidScramble());
         document.getElementById('resetFaceBtn').addEventListener('click', () => this.resetCurrentFace());
         document.getElementById('solveCubeBtn').addEventListener('click', () => this.solveCube());
 
@@ -91,6 +92,16 @@ class CubeSolver {
         document.querySelectorAll('.step').forEach((step, index) => {
             step.addEventListener('click', () => this.goToFace(index));
         });
+
+        // 3D viewer controls
+        const resetViewBtn = document.getElementById('resetViewBtn');
+        if (resetViewBtn) {
+            resetViewBtn.addEventListener('click', () => {
+                if (this.cube3DViewer) {
+                    this.cube3DViewer.resetView();
+                }
+            });
+        }
     }
 
     switchInputMethod(method) {
@@ -100,11 +111,35 @@ class CubeSolver {
 
         // Show/hide sections
         document.querySelectorAll('.input-section').forEach(section => section.classList.remove('active'));
-        document.getElementById(`${method}InputSection`).classList.add('active');
+        
+        if (method === 'threeD') {
+            document.getElementById('threeDViewSection').classList.add('active');
+            this.init3DViewer();
+        } else {
+            document.getElementById(`${method}InputSection`).classList.add('active');
+        }
 
         // Stop camera if switching away from camera
         if (method !== 'camera' && this.cameraStream) {
             this.stopCamera();
+        }
+    }
+
+    init3DViewer() {
+        if (!this.cube3DViewer) {
+            const container = document.getElementById('threeDViewer');
+            if (container && window.THREE) {
+                this.cube3DViewer = new Cube3DViewer(container);
+                this.update3DView();
+            }
+        } else {
+            this.update3DView();
+        }
+    }
+
+    update3DView() {
+        if (this.cube3DViewer) {
+            this.cube3DViewer.updateCubeState(this.cubeState);
         }
     }
 
@@ -153,6 +188,9 @@ class CubeSolver {
         // Add visual feedback
         square.classList.add('square-updated');
         setTimeout(() => square.classList.remove('square-updated'), 300);
+        
+        // Update 3D view
+        this.update3DView();
     }
 
     updateFaceDisplay() {
@@ -229,6 +267,7 @@ class CubeSolver {
         }
         
         this.generateCubeFace();
+        this.update3DView();
         
         // Visual feedback
         const resetBtn = document.getElementById('resetFaceBtn');
@@ -238,75 +277,6 @@ class CubeSolver {
             resetBtn.classList.remove('btn-success');
             resetBtn.innerHTML = '<i class="fas fa-undo"></i> Reset Face';
         }, 1000);
-    }
-
-    async loadValidScramble() {
-        try {
-            const loadBtn = document.getElementById('loadScrambleBtn');
-            const originalText = loadBtn.innerHTML;
-            loadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
-            loadBtn.disabled = true;
-
-            const response = await fetch('/api/scrambled-cube');
-            if (response.ok) {
-                const data = await response.json();
-                
-                // Parse the cube state string and load it into our cube
-                this.loadCubeFromString(data.state);
-                
-                // Show success message
-                loadBtn.classList.add('btn-success');
-                loadBtn.innerHTML = '<i class="fas fa-check"></i> Scramble Loaded!';
-                
-                // Update interface
-                this.currentFaceIndex = 0;
-                this.updateFaceDisplay();
-                this.updateProgressIndicator();
-                
-                setTimeout(() => {
-                    loadBtn.classList.remove('btn-success');
-                    loadBtn.innerHTML = originalText;
-                    loadBtn.disabled = false;
-                }, 2000);
-                
-            } else {
-                throw new Error('Failed to load scramble');
-            }
-        } catch (error) {
-            console.error('Error loading scramble:', error);
-            const loadBtn = document.getElementById('loadScrambleBtn');
-            loadBtn.innerHTML = '<i class="fas fa-exclamation"></i> Error';
-            setTimeout(() => {
-                loadBtn.innerHTML = '<i class="fas fa-random"></i> Load Valid Scramble';
-                loadBtn.disabled = false;
-            }, 2000);
-        }
-    }
-
-    loadCubeFromString(cubeString) {
-        // Convert URFDLB string back to our cube state
-        // U=yellow, R=red, F=blue, D=white, L=orange, B=green
-        const stringToColor = {
-            'U': 'yellow',
-            'R': 'red', 
-            'F': 'blue',
-            'D': 'white',
-            'L': 'orange',
-            'B': 'green'
-        };
-        
-        // Parse each face (9 characters each)
-        const faces = ['yellow', 'red', 'blue', 'white', 'orange', 'green'];
-        
-        for (let faceIndex = 0; faceIndex < 6; faceIndex++) {
-            const face = faces[faceIndex];
-            const startIndex = faceIndex * 9;
-            
-            for (let squareIndex = 0; squareIndex < 9; squareIndex++) {
-                const char = cubeString[startIndex + squareIndex];
-                this.cubeState[face][squareIndex] = stringToColor[char];
-            }
-        }
     }
 
     async solveCube() {
@@ -428,6 +398,7 @@ class CubeSolver {
         this.currentFaceIndex = 0;
         this.updateFaceDisplay();
         this.updateProgressIndicator();
+        this.update3DView();
         
         // Hide solution
         document.getElementById('solutionSection').style.display = 'none';
@@ -439,16 +410,41 @@ class CubeSolver {
     // Camera functionality
     async startCamera() {
         try {
-            this.cameraStream = await navigator.mediaDevices.getUserMedia({
+            // Check if mediaDevices is supported
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                throw new Error('Camera access is not supported in this browser');
+            }
+
+            // Request camera permission with fallback options
+            let constraints = {
                 video: { 
-                    width: 640, 
-                    height: 480,
-                    facingMode: 'environment' // Use back camera if available
+                    width: { ideal: 640 }, 
+                    height: { ideal: 480 },
+                    facingMode: 'environment' // Prefer back camera for scanning
                 }
-            });
+            };
+
+            try {
+                this.cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+            } catch (error) {
+                // Fallback to any available camera
+                console.warn('Environment camera not available, trying any camera:', error);
+                constraints = {
+                    video: { 
+                        width: { ideal: 640 }, 
+                        height: { ideal: 480 }
+                    }
+                };
+                this.cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+            }
             
             const video = document.getElementById('cameraVideo');
             video.srcObject = this.cameraStream;
+            
+            // Wait for video to be ready
+            video.onloadedmetadata = () => {
+                video.play();
+            };
             
             // Update UI
             document.getElementById('startCameraBtn').style.display = 'none';
@@ -456,9 +452,33 @@ class CubeSolver {
             document.getElementById('stopCameraBtn').style.display = 'inline-block';
             
             this.updateCameraInstructions();
+            
         } catch (error) {
             console.error('Error accessing camera:', error);
-            alert('Unable to access camera. Please check permissions and try again.');
+            let errorMessage = 'Unable to access camera. ';
+            
+            if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+                errorMessage += 'Please allow camera permissions in your browser settings and try again.';
+            } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
+                errorMessage += 'No camera found on this device.';
+            } else if (error.name === 'NotSupportedError') {
+                errorMessage += 'Camera is not supported in this browser. Try using Chrome, Firefox, or Edge.';
+            } else {
+                errorMessage += error.message || 'Please check your camera settings and try again.';
+            }
+            
+            // Show user-friendly error message
+            const startBtn = document.getElementById('startCameraBtn');
+            startBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Camera Error';
+            startBtn.style.backgroundColor = '#e74c3c';
+            
+            alert(errorMessage);
+            
+            // Reset button after 3 seconds
+            setTimeout(() => {
+                startBtn.innerHTML = '<i class="fas fa-camera"></i> Start Camera';
+                startBtn.style.backgroundColor = '';
+            }, 3000);
         }
     }
 
