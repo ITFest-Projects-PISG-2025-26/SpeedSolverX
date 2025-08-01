@@ -176,21 +176,26 @@ class CubingTimer {
             this.inspectionElement.textContent = this.inspectionTime;
             
             if (this.inspectionTime <= 0) {
-                // Auto-start timer and apply DNF
+                // Stop inspection - user took too long
                 clearInterval(this.inspectionInterval);
                 this.isInspecting = false;
                 this.inspectionElement.style.display = 'none';
                 this.timerElement.classList.remove('inspection');
                 
-                // Start the main timer automatically
-                this.startMainTimer();
-                
                 // Mark as DNF for exceeding inspection time
                 this.currentPenalty = 'dnf';
                 this.timerElement.classList.add('dnf');
+                this.timerElement.textContent = 'DNF';
                 
                 if (this.settings.sound) {
                     this.playSound('error');
+                }
+                
+                // Record DNF solve with 0 time
+                this.recordSolve(0, 'dnf');
+                
+                if (this.settings.autoScramble) {
+                    this.generateNewScramble();
                 }
             } else if (this.inspectionTime === 8) {
                 // 8 second warning sound
@@ -243,7 +248,7 @@ class CubingTimer {
         
         this.interval = setInterval(() => {
             const elapsed = (Date.now() - this.startTime) / 1000;
-            const precision = this.settings.milliseconds ? 3 : 2;
+            const precision = this.settings.milliseconds ? 3 : 3;
             this.timerElement.textContent = elapsed.toFixed(precision);
         }, 10);
         
@@ -282,16 +287,17 @@ class CubingTimer {
     
     resetTimer() {
         clearInterval(this.interval);
-        clearInterval(this.settings.inspectionInterval);
+        clearInterval(this.inspectionInterval);
         
         this.isRunning = false;
         this.isInspecting = false;
-        this.settings.inspectionTime = 15;
+        this.inspectionTime = 15;
+        this.currentPenalty = null;
         
-        this.timerElement.textContent = '0.00';
+        this.timerElement.textContent = '0.000';
         this.timerElement.className = 'timer';
-        this.settings.inspectionElement.style.display = 'none';
-        this.settings.inspectionElement.style.color = '#e74c3c';
+        this.inspectionElement.style.display = 'none';
+        this.inspectionElement.style.color = '#e74c3c';
         
         if (this.scrambleElement) {
             this.scrambleElement.style.opacity = '1';
@@ -467,11 +473,11 @@ class CubingTimer {
     
     formatSolveTime(solve) {
         if (solve.dnf) {
-            return `DNF(${solve.time.toFixed(2)})`;
+            return `DNF(${solve.time.toFixed(3)})`;
         } else if (solve.plus2) {
-            return `${(solve.time + 2).toFixed(2)}+`;
+            return `${(solve.time + 2).toFixed(3)}+`;
         } else {
-            return solve.time.toFixed(2);
+            return solve.time.toFixed(3);
         }
     }
     
