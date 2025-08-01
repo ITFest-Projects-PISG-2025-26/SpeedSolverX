@@ -1,5 +1,6 @@
 class CubingTimer {
     constructor() {
+        console.log('Timer: Constructor starting...');
         this.startTime = null;
         this.interval = null;
         this.inspectionInterval = null;
@@ -23,10 +24,20 @@ class CubingTimer {
             milliseconds: false
         };
         
+        console.log('Timer: Loading settings...');
         this.loadSettings();
+        console.log('Timer: Final settings:', this.settings);
+        
+        console.log('Timer: Initializing elements...');
         this.initializeElements();
+        
+        console.log('Timer: Binding events...');
         this.bindEvents();
+        
+        console.log('Timer: Loading recent solves...');
         this.loadRecentSolves();
+        
+        console.log('Timer: Constructor completed successfully!');
     }
     
     loadSettings() {
@@ -46,6 +57,7 @@ class CubingTimer {
     }
     
     initializeElements() {
+        console.log('Timer: Initializing elements...');
         this.timerElement = document.getElementById('timer');
         this.inspectionElement = document.getElementById('inspectionTimer');
         this.scrambleElement = document.getElementById('scrambleDisplay');
@@ -55,6 +67,18 @@ class CubingTimer {
         this.dnfBtn = document.getElementById('dnfBtn');
         this.deleteBtn = document.getElementById('deleteBtn');
         this.solvesListElement = document.getElementById('solvesList');
+        
+        console.log('Timer elements found:', {
+            timer: !!this.timerElement,
+            inspection: !!this.inspectionElement,
+            scramble: !!this.scrambleElement,
+            newScramble: !!this.newScrambleBtn,
+            reset: !!this.resetBtn,
+            plus2: !!this.plus2Btn,
+            dnf: !!this.dnfBtn,
+            delete: !!this.deleteBtn,
+            solvesList: !!this.solvesListElement
+        });
     }
     
     bindEvents() {
@@ -74,27 +98,41 @@ class CubingTimer {
     }
     
     handleKeyDown(e) {
+        console.log('Timer: Key down event:', e.code, 'isRunning:', this.isRunning, 'isInspecting:', this.isInspecting);
+        
         if (e.code === 'Space' && !this.keyPressed) {
             e.preventDefault();
             this.keyPressed = true;
+            console.log('Timer: Space key pressed, current state:', {
+                isRunning: this.isRunning,
+                isInspecting: this.isInspecting,
+                holdToStart: this.settings.holdToStart,
+                inspection: this.settings.inspection
+            });
             
             if (this.isRunning) {
+                console.log('Timer: Stopping timer');
                 this.stopTimer();
             } else if (this.isInspecting) {
+                console.log('Timer: Starting main timer from inspection');
                 this.startMainTimer();
             } else {
                 // Start hold timer for reset/start
                 if (this.settings.holdToStart) {
+                    console.log('Timer: Starting hold timer');
                     this.holdTimer = setTimeout(() => {
                         if (this.settings.inspection) {
+                            console.log('Timer: Starting inspection after hold');
                             this.startInspection();
                         } else {
+                            console.log('Timer: Starting main timer after hold');
                             this.startMainTimer();
                         }
                     }, 100);
                     
                     this.timerElement.style.color = '#f39c12';
                 } else {
+                    console.log('Timer: Starting immediately (no hold)');
                     if (this.settings.inspection) {
                         this.startInspection();
                     } else {
@@ -122,25 +160,26 @@ class CubingTimer {
     }
     
     startInspection() {
+        console.log('Timer: startInspection called');
         this.isInspecting = true;
-        this.settings.inspectionTime = 15;
-        this.settings.inspectionElement.style.display = 'block';
-        this.settings.inspectionElement.textContent = this.settings.inspectionTime;
+        this.inspectionTime = 15;
+        this.inspectionElement.style.display = 'block';
+        this.inspectionElement.textContent = this.inspectionTime;
         this.timerElement.classList.add('inspection');
         
         if (this.settings.hideScramble) {
             this.scrambleElement.style.opacity = '0.3';
         }
         
-        this.settings.inspectionInterval = setInterval(() => {
-            this.settings.inspectionTime--;
-            this.settings.inspectionElement.textContent = this.settings.inspectionTime;
+        this.inspectionInterval = setInterval(() => {
+            this.inspectionTime--;
+            this.inspectionElement.textContent = this.inspectionTime;
             
-            if (this.settings.inspectionTime <= 0) {
+            if (this.inspectionTime <= 0) {
                 // Auto-start timer and apply DNF
-                clearInterval(this.settings.inspectionInterval);
+                clearInterval(this.inspectionInterval);
                 this.isInspecting = false;
-                this.settings.inspectionElement.style.display = 'none';
+                this.inspectionElement.style.display = 'none';
                 this.timerElement.classList.remove('inspection');
                 
                 // Start the main timer automatically
@@ -153,20 +192,25 @@ class CubingTimer {
                 if (this.settings.sound) {
                     this.playSound('error');
                 }
-            } else if (this.settings.inspectionTime <= 3) {
+            } else if (this.inspectionTime <= 3) {
                 // Warning for last 3 seconds
-                this.settings.inspectionElement.style.color = '#e74c3c';
+                this.inspectionElement.style.color = '#e74c3c';
                 if (this.settings.sound) {
                     this.playSound('warning');
                 }
             }
         }, 1000);
+        
+        console.log('Timer: Inspection started successfully');
     }
     
     startMainTimer() {
+        console.log('Timer: startMainTimer called, isInspecting:', this.isInspecting);
+        
         if (this.isInspecting) {
-            clearInterval(this.settings.inspectionInterval);
-            this.settings.inspectionElement.style.display = 'none';
+            console.log('Timer: Clearing inspection interval');
+            clearInterval(this.inspectionInterval);
+            this.inspectionElement.style.display = 'none';
             this.isInspecting = false;
             this.timerElement.classList.remove('inspection');
             
@@ -175,6 +219,7 @@ class CubingTimer {
             }
         }
         
+        console.log('Timer: Starting main timer');
         this.isRunning = true;
         this.startTime = Date.now();
         this.timerElement.classList.add('running');
@@ -188,6 +233,8 @@ class CubingTimer {
             const precision = this.settings.milliseconds ? 3 : 2;
             this.timerElement.textContent = elapsed.toFixed(precision);
         }, 10);
+        
+        console.log('Timer: Main timer started successfully');
     }
     
     stopTimer() {
