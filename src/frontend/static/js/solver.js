@@ -2,23 +2,7 @@
 class CubeSolver {
     constructor() {
         this.currentFaceIndex = 0;
-        this.sele    init3DViewer() {
-        console.log('init3DViewer called');
-        if (!this.cube3DViewer) {
-            const container = document.getElementById('threeDViewer');
-            console.log('3D container element:', container);
-            if (container) {
-                console.log('Creating new Cube3DViewer');
-                this.cube3DViewer = new Cube3DViewer(container);
-                this.update3DView();
-            } else {
-                console.error('3D viewer container not found!');
-            }
-        } else {
-            console.log('3D viewer already exists, updating view');
-            this.update3DView();
-        }
-    } 'blue';
+        this.selectedColor = 'blue';
         this.cubeState = {
             blue: Array(9).fill('blue'),    // Front face (F)
             red: Array(9).fill('red'),      // Right face (R)
@@ -62,26 +46,37 @@ class CubeSolver {
     }
 
     setupEventListeners() {
-        // Input method switching
-        document.getElementById('visualInputBtn').addEventListener('click', () => this.switchInputMethod('visual'));
-        document.getElementById('cameraInputBtn').addEventListener('click', () => this.switchInputMethod('camera'));
-        document.getElementById('view3DBtn').addEventListener('click', () => {
-            console.log('3D View button clicked!');
-            this.switchInputMethod('threeD');
-        });
+        try {
+            // Input method switching
+            const visualBtn = document.getElementById('visualInputBtn');
+            const cameraBtn = document.getElementById('cameraInputBtn');
+            const view3DBtn = document.getElementById('view3DBtn');
+            
+            if (visualBtn) visualBtn.addEventListener('click', () => this.switchInputMethod('visual'));
+            if (cameraBtn) cameraBtn.addEventListener('click', () => this.switchInputMethod('camera'));
+            if (view3DBtn) {
+                view3DBtn.addEventListener('click', () => {
+                    console.log('3D View button clicked!');
+                    this.switchInputMethod('threeD');
+                });
+            }
 
-        // Color palette
-        document.querySelectorAll('.color-option').forEach(option => {
-            option.addEventListener('click', (e) => this.selectColor(e.target.dataset.color));
-        });
+            // Color palette
+            document.querySelectorAll('.color-option').forEach(option => {
+                option.addEventListener('click', (e) => this.selectColor(e.target.dataset.color));
+            });
 
-        // Face navigation
-        document.getElementById('prevFaceBtn').addEventListener('click', () => this.previousFace());
-        document.getElementById('nextFaceBtn').addEventListener('click', () => this.nextFace());
+            // Face navigation
+            const prevBtn = document.getElementById('prevFaceBtn');
+            const nextBtn = document.getElementById('nextFaceBtn');
+            if (prevBtn) prevBtn.addEventListener('click', () => this.previousFace());
+            if (nextBtn) nextBtn.addEventListener('click', () => this.nextFace());
 
-        // Control buttons
-        document.getElementById('resetFaceBtn').addEventListener('click', () => this.resetCurrentFace());
-        document.getElementById('solveCubeBtn').addEventListener('click', () => this.solveCube());
+            // Control buttons
+            const resetFaceBtn = document.getElementById('resetFaceBtn');
+            const solveCubeBtn = document.getElementById('solveCubeBtn');
+            if (resetFaceBtn) resetFaceBtn.addEventListener('click', () => this.resetCurrentFace());
+            if (solveCubeBtn) solveCubeBtn.addEventListener('click', () => this.solveCube());
 
         // Add debug button for testing
         const debugBtn = document.createElement('button');
@@ -91,35 +86,44 @@ class CubeSolver {
         debugBtn.addEventListener('click', () => this.testSolvedCube());
         document.getElementById('solveCubeBtn').parentNode.appendChild(debugBtn);
 
-        // Camera controls
-        document.getElementById('startCameraBtn').addEventListener('click', () => this.startCamera());
-        document.getElementById('captureBtn').addEventListener('click', () => this.captureFrame());
-        document.getElementById('stopCameraBtn').addEventListener('click', () => this.stopCamera());
+            // Camera controls
+            const startCameraBtn = document.getElementById('startCameraBtn');
+            const captureBtn = document.getElementById('captureBtn');
+            const stopCameraBtn = document.getElementById('stopCameraBtn');
+            
+            if (startCameraBtn) startCameraBtn.addEventListener('click', () => this.startCamera());
+            if (captureBtn) captureBtn.addEventListener('click', () => this.captureFrame());
+            if (stopCameraBtn) stopCameraBtn.addEventListener('click', () => this.stopCamera());
 
-        // Solution controls
-        const copySolutionBtn = document.getElementById('copySolutionBtn');
-        const newSolveBtn = document.getElementById('newSolveBtn');
-        
-        if (copySolutionBtn) {
-            copySolutionBtn.addEventListener('click', () => this.copySolution());
-        }
-        if (newSolveBtn) {
-            newSolveBtn.addEventListener('click', () => this.resetSolver());
-        }
+            // Solution controls
+            const copySolutionBtn = document.getElementById('copySolutionBtn');
+            const newSolveBtn = document.getElementById('newSolveBtn');
+            
+            if (copySolutionBtn) {
+                copySolutionBtn.addEventListener('click', () => this.copySolution());
+            }
+            if (newSolveBtn) {
+                newSolveBtn.addEventListener('click', () => this.resetSolver());
+            }
 
-        // Progress step navigation
-        document.querySelectorAll('.step').forEach((step, index) => {
-            step.addEventListener('click', () => this.goToFace(index));
-        });
-
-        // 3D viewer controls
-        const resetViewBtn = document.getElementById('resetViewBtn');
-        if (resetViewBtn) {
-            resetViewBtn.addEventListener('click', () => {
-                if (this.cube3DViewer) {
-                    this.cube3DViewer.resetView();
-                }
+            // Progress step navigation
+            document.querySelectorAll('.step').forEach((step, index) => {
+                step.addEventListener('click', () => this.goToFace(index));
             });
+
+            // 3D viewer controls
+            const resetViewBtn = document.getElementById('resetViewBtn');
+            if (resetViewBtn) {
+                resetViewBtn.addEventListener('click', () => {
+                    if (this.cube3DViewer) {
+                        this.cube3DViewer.resetView();
+                    }
+                });
+            }
+            
+            console.log('Event listeners set up successfully');
+        } catch (error) {
+            console.error('Error setting up event listeners:', error);
         }
     }
 
@@ -197,6 +201,11 @@ class CubeSolver {
 
     generateCubeFace() {
         const cubeFace = document.getElementById('cubeFace');
+        if (!cubeFace) {
+            console.error('cubeFace element not found!');
+            return;
+        }
+        
         cubeFace.innerHTML = '';
 
         for (let i = 0; i < 9; i++) {
@@ -238,23 +247,35 @@ class CubeSolver {
         const currentFace = this.faceOrder[this.currentFaceIndex];
         
         // Update face name
-        document.getElementById('currentFaceName').textContent = this.faceNames[currentFace];
+        const faceNameElement = document.getElementById('currentFaceName');
+        if (faceNameElement) {
+            faceNameElement.textContent = this.faceNames[currentFace];
+        }
         
         // Update face counter
-        document.getElementById('faceCounter').textContent = `${this.currentFaceIndex + 1} / 6`;
+        const faceCounterElement = document.getElementById('faceCounter');
+        if (faceCounterElement) {
+            faceCounterElement.textContent = `${this.currentFaceIndex + 1} / 6`;
+        }
         
         // Update navigation buttons
-        document.getElementById('prevFaceBtn').disabled = this.currentFaceIndex === 0;
-        document.getElementById('nextFaceBtn').disabled = this.currentFaceIndex === 5;
+        const prevBtn = document.getElementById('prevFaceBtn');
+        const nextBtn = document.getElementById('nextFaceBtn');
+        if (prevBtn) prevBtn.disabled = this.currentFaceIndex === 0;
+        if (nextBtn) nextBtn.disabled = this.currentFaceIndex === 5;
         
         // Update instructions
         const instructions = document.getElementById('faceInstructions');
-        if (this.currentFaceIndex === 5) {
-            instructions.textContent = 'Complete! Ready to solve the cube.';
-            document.getElementById('solveCubeBtn').style.display = 'block';
-        } else {
-            instructions.textContent = `Click on the squares to set their colors. The center is fixed to ${currentFace}.`;
-            document.getElementById('solveCubeBtn').style.display = 'none';
+        const solveBtn = document.getElementById('solveCubeBtn');
+        
+        if (instructions) {
+            if (this.currentFaceIndex === 5) {
+                instructions.textContent = 'Complete! Ready to solve the cube.';
+                if (solveBtn) solveBtn.style.display = 'block';
+            } else {
+                instructions.textContent = `Click on the squares to set their colors. The center is fixed to ${currentFace}.`;
+                if (solveBtn) solveBtn.style.display = 'none';
+            }
         }
         
         // Regenerate face
@@ -592,7 +613,13 @@ class CubeSolver {
 
 // Initialize solver when page loads
 document.addEventListener('DOMContentLoaded', () => {
-    window.cubeSolver = new CubeSolver();
+    console.log('DOM loaded, initializing CubeSolver...');
+    try {
+        window.cubeSolver = new CubeSolver();
+        console.log('CubeSolver initialized successfully');
+    } catch (error) {
+        console.error('Error initializing CubeSolver:', error);
+    }
 });
 
 // Add CSS animations and styles

@@ -5,23 +5,39 @@ class SettingsManager {
             this.init();
         } else {
             document.addEventListener('DOMContentLoaded', () => {
-                setTimeout(() => this.init(), 100); // Small delay to ensure global settings is ready
+                // Give time for global settings to load
+                const checkGlobalSettings = () => {
+                    if (window.globalSettings) {
+                        this.init();
+                    } else {
+                        setTimeout(checkGlobalSettings, 50);
+                    }
+                };
+                checkGlobalSettings();
             });
         }
     }
     
     init() {
-        this.globalSettings = window.globalSettings;
-        this.settings = this.globalSettings.getAllSettings();
-        this.initializeElements();
-        this.bindEvents();
-        this.applySettings();
-        
-        // Listen for settings changes from other sources
-        window.addEventListener('settingsChanged', (e) => {
-            this.settings = e.detail.allSettings;
-            this.updateUIFromSettings();
-        });
+        try {
+            this.globalSettings = window.globalSettings;
+            this.settings = this.globalSettings.getAllSettings();
+            console.log('Settings Manager initialized with settings:', this.settings);
+            
+            this.initializeElements();
+            this.bindEvents();
+            this.applySettings();
+            
+            // Listen for settings changes from other sources
+            window.addEventListener('settingsChanged', (e) => {
+                this.settings = e.detail.allSettings;
+                this.updateUIFromSettings();
+            });
+            
+            console.log('Settings Manager fully initialized');
+        } catch (error) {
+            console.error('Error initializing Settings Manager:', error);
+        }
     }
     
     initializeElements() {
@@ -45,34 +61,60 @@ class SettingsManager {
             resetSettingsBtn: document.getElementById('resetSettingsBtn'),
             saveSettingsBtn: document.getElementById('saveSettingsBtn')
         };
+        
+        // Log which elements are found
+        console.log('Settings elements initialized:', Object.keys(this.elements).reduce((acc, key) => {
+            acc[key] = !!this.elements[key];
+            return acc;
+        }, {}));
     }
     
     bindEvents() {
-        // Toggle events
-        Object.keys(this.elements).forEach(key => {
-            if (key.includes('Toggle')) {
-                this.elements[key]?.addEventListener('change', (e) => {
-                    const settingKey = key.replace('Toggle', '');
-                    this.updateSetting(settingKey, e.target.checked);
+        try {
+            // Toggle events
+            Object.keys(this.elements).forEach(key => {
+                if (key.includes('Toggle') && this.elements[key]) {
+                    this.elements[key].addEventListener('change', (e) => {
+                        const settingKey = key.replace('Toggle', '');
+                        this.updateSetting(settingKey, e.target.checked);
+                    });
+                }
+            });
+            
+            // Input events
+            if (this.elements.scrambleLengthInput) {
+                this.elements.scrambleLengthInput.addEventListener('change', (e) => {
+                    this.updateSetting('scrambleLength', parseInt(e.target.value));
                 });
             }
-        });
-        
-        // Input events
-        this.elements.scrambleLengthInput?.addEventListener('change', (e) => {
-            this.updateSetting('scrambleLength', parseInt(e.target.value));
-        });
-        
-        this.elements.cubeTypeSelect?.addEventListener('change', (e) => {
-            this.updateSetting('cubeType', e.target.value);
-        });
-        
-        // Button events
-        this.elements.exportDataBtn?.addEventListener('click', () => this.exportData());
-        this.elements.importDataBtn?.addEventListener('click', () => this.importData());
-        this.elements.clearStatsBtn?.addEventListener('click', () => this.clearStats());
-        this.elements.resetSettingsBtn?.addEventListener('click', () => this.resetSettings());
-        this.elements.saveSettingsBtn?.addEventListener('click', () => this.saveSettings());
+            
+            if (this.elements.cubeTypeSelect) {
+                this.elements.cubeTypeSelect.addEventListener('change', (e) => {
+                    this.updateSetting('cubeType', e.target.value);
+                });
+            }
+            
+            // Button events
+            if (this.elements.exportDataBtn) {
+                this.elements.exportDataBtn.addEventListener('click', () => this.exportData());
+            }
+            if (this.elements.importDataBtn) {
+                this.elements.importDataBtn.addEventListener('click', () => this.importData());
+            }
+            if (this.elements.clearStatsBtn) {
+                this.elements.clearStatsBtn.addEventListener('click', () => this.clearStats());
+            }
+            if (this.elements.resetSettingsBtn) {
+                this.elements.resetSettingsBtn.addEventListener('click', () => this.resetSettings());
+            }
+            if (this.elements.saveSettingsBtn) {
+                this.elements.saveSettingsBtn.addEventListener('click', () => this.saveSettings());
+            }
+            
+            console.log('Settings event listeners bound successfully');
+        } catch (error) {
+            console.error('Error binding settings events:', error);
+        }
     }
     
     loadSettings() {
@@ -96,20 +138,29 @@ class SettingsManager {
     }
     
     updateUIFromSettings() {
-        // Update UI elements when settings change from external source
-        Object.keys(this.settings).forEach(key => {
-            const element = this.elements[key + 'Toggle'] || 
-                           this.elements[key + 'Input'] || 
-                           this.elements[key + 'Select'];
-            
-            if (element) {
-                if (element.type === 'checkbox') {
-                    element.checked = this.settings[key];
-                } else {
-                    element.value = this.settings[key];
+        try {
+            // Update UI elements when settings change from external source
+            Object.keys(this.settings).forEach(key => {
+                const toggleElement = this.elements[key + 'Toggle'];
+                const inputElement = this.elements[key + 'Input'];
+                const selectElement = this.elements[key + 'Select'];
+                
+                if (toggleElement && toggleElement.type === 'checkbox') {
+                    toggleElement.checked = this.settings[key];
+                } else if (inputElement) {
+                    inputElement.value = this.settings[key];
+                } else if (selectElement) {
+                    selectElement.value = this.settings[key];
                 }
-            }
-        });
+                
+                // Apply the setting to the page
+                this.applySingleSetting(key, this.settings[key]);
+            });
+            
+            console.log('UI updated from settings:', this.settings);
+        } catch (error) {
+            console.error('Error updating UI from settings:', error);
+        }
     }
     
     saveSettings() {
