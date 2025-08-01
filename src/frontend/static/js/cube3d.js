@@ -1,6 +1,7 @@
 // 3D Cube Viewer using Three.js
 class Cube3DViewer {
     constructor(container) {
+        console.log('Cube3DViewer constructor called with container:', container);
         this.container = container;
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
@@ -17,7 +18,9 @@ class Cube3DViewer {
             green: 0x00CC00     // Back
         };
         
+        console.log('About to initialize 3D viewer...');
         this.init();
+        console.log('3D viewer initialization complete');
     }
     
     init() {

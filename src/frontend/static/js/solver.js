@@ -2,7 +2,23 @@
 class CubeSolver {
     constructor() {
         this.currentFaceIndex = 0;
-        this.selectedColor = 'blue';
+        this.sele    init3DViewer() {
+        console.log('init3DViewer called');
+        if (!this.cube3DViewer) {
+            const container = document.getElementById('threeDViewer');
+            console.log('3D container element:', container);
+            if (container) {
+                console.log('Creating new Cube3DViewer');
+                this.cube3DViewer = new Cube3DViewer(container);
+                this.update3DView();
+            } else {
+                console.error('3D viewer container not found!');
+            }
+        } else {
+            console.log('3D viewer already exists, updating view');
+            this.update3DView();
+        }
+    } 'blue';
         this.cubeState = {
             blue: Array(9).fill('blue'),    // Front face (F)
             red: Array(9).fill('red'),      // Right face (R)
@@ -49,7 +65,10 @@ class CubeSolver {
         // Input method switching
         document.getElementById('visualInputBtn').addEventListener('click', () => this.switchInputMethod('visual'));
         document.getElementById('cameraInputBtn').addEventListener('click', () => this.switchInputMethod('camera'));
-        document.getElementById('view3DBtn').addEventListener('click', () => this.switchInputMethod('threeD'));
+        document.getElementById('view3DBtn').addEventListener('click', () => {
+            console.log('3D View button clicked!');
+            this.switchInputMethod('threeD');
+        });
 
         // Color palette
         document.querySelectorAll('.color-option').forEach(option => {
@@ -105,15 +124,24 @@ class CubeSolver {
     }
 
     switchInputMethod(method) {
+        console.log('Switching input method to:', method);
+        
         // Update button states
         document.querySelectorAll('.method-btn').forEach(btn => btn.classList.remove('active'));
-        document.getElementById(`${method}InputBtn`).classList.add('active');
+        
+        if (method === 'threeD') {
+            document.getElementById('view3DBtn').classList.add('active');
+        } else {
+            document.getElementById(`${method}InputBtn`).classList.add('active');
+        }
 
         // Show/hide sections
         document.querySelectorAll('.input-section').forEach(section => section.classList.remove('active'));
         
         if (method === 'threeD') {
-            document.getElementById('threeDViewSection').classList.add('active');
+            const threeDSection = document.getElementById('threeDViewSection');
+            console.log('3D section element:', threeDSection);
+            threeDSection.classList.add('active');
             this.init3DViewer();
         } else {
             document.getElementById(`${method}InputSection`).classList.add('active');
@@ -126,13 +154,26 @@ class CubeSolver {
     }
 
     init3DViewer() {
+        console.log('init3DViewer called');
         if (!this.cube3DViewer) {
             const container = document.getElementById('threeDViewer');
-            if (container && window.THREE) {
+            console.log('3D container element:', container);
+            console.log('THREE.js available:', !!window.THREE);
+            console.log('Cube3DViewer available:', typeof Cube3DViewer);
+            
+            if (container && window.THREE && typeof Cube3DViewer !== 'undefined') {
+                console.log('Creating new Cube3DViewer');
                 this.cube3DViewer = new Cube3DViewer(container);
                 this.update3DView();
+            } else {
+                console.error('Missing dependencies:', {
+                    container: !!container,
+                    THREE: !!window.THREE,
+                    Cube3DViewer: typeof Cube3DViewer !== 'undefined'
+                });
             }
         } else {
+            console.log('3D viewer already exists, updating view');
             this.update3DView();
         }
     }
