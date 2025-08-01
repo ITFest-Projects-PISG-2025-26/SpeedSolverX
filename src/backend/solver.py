@@ -55,3 +55,42 @@ def generate_scramble():
         last_move = move
     
     return ' '.join(scramble)
+
+def convert_to_kociemba_format(cube_state):
+    """
+    Convert cube state dictionary to kociemba format string.
+    
+    Kociemba format: UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB
+    Where: U=Up(Yellow), R=Right(Red), F=Front(Blue), D=Down(White), L=Left(Orange), B=Back(Green)
+    
+    Our format:
+    - blue (front), green (back), red (right), orange (left), yellow (top), white (bottom)
+    """
+    try:
+        # Map our colors to kociemba characters
+        color_to_char = {
+            'yellow': 'U',  # Up face
+            'red': 'R',     # Right face  
+            'blue': 'F',    # Front face
+            'white': 'D',   # Down face
+            'orange': 'L',  # Left face
+            'green': 'B'    # Back face
+        }
+        
+        # Face order in kociemba: U R F D L B
+        # Our face order: yellow, red, blue, white, orange, green
+        face_order = ['yellow', 'red', 'blue', 'white', 'orange', 'green']
+        
+        kociemba_string = ""
+        
+        for face_color in face_order:
+            face_squares = cube_state[face_color]
+            for square_color in face_squares:
+                kociemba_string += color_to_char[square_color]
+        
+        print(f"Converted cube state to kociemba format: {kociemba_string}")
+        return kociemba_string
+        
+    except Exception as e:
+        print(f"Error converting cube state: {e}")
+        raise ValueError(f"Invalid cube state format: {e}")

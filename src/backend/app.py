@@ -3,7 +3,7 @@ import json
 from flask import Flask, render_template, redirect, url_for, request, jsonify
 from flask_login import LoginManager, login_required, current_user
 from auth import auth_bp, init_login
-from solver import solve, generate_scramble
+from solver import solve, generate_scramble, convert_to_kociemba_format
 from dotenv import load_dotenv
 from datetime import datetime
 import statistics
@@ -69,9 +69,35 @@ def get_scramble():
 @app.route('/solve', methods=['POST'])
 @login_required
 def solve_cube():
-    cube = request.form.get('cube')
-    solution = solve(cube)
-    return jsonify({'solution': solution})
+    try:
+        data = request.get_json()
+        if not data or 'cube_state' not in data:
+            return jsonify({'success': False, 'error': 'No cube state provided'}), 400
+        
+        cube_state = data['cube_state']
+        
+        # Convert cube state to kociemba format
+        kociemba_string = convert_to_kociemba_format(cube_state)
+        
+        # Solve the cube using existing solver function
+        solution = solve(kociemba_string)
+        
+        # Check if solution is an error message
+        if "Invalid" in solution or "not solvable" in solution or "Error" in solution:
+            return jsonify({'success': False, 'error': solution})
+        
+        # Count moves
+        moves = solution.strip().split()
+        move_count = len(moves)
+        
+        return jsonify({
+            'success': True,
+            'solution': solution,
+            'move_count': move_count
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/api/solve', methods=['POST'])
 @login_required
