@@ -40,16 +40,20 @@ class GlobalSettings {
         this.applyLargeTimer();
         this.applyCustomStyles();
         
+        console.log('Global settings applied:', this.settings);
+        
         // Listen for settings changes from other pages
         window.addEventListener('storage', (e) => {
             if (e.key === 'speedsolverx_settings') {
                 this.settings = this.loadSettings();
                 this.applyGlobalSettings();
+                console.log('Settings refreshed from storage change');
             }
         });
     }
     
     applyDarkMode() {
+        console.log('Applying dark mode:', this.settings.darkMode);
         if (this.settings.darkMode) {
             document.body.classList.add('dark-mode');
             document.documentElement.setAttribute('data-theme', 'dark');
@@ -57,6 +61,7 @@ class GlobalSettings {
             document.body.classList.remove('dark-mode');
             document.documentElement.setAttribute('data-theme', 'light');
         }
+        console.log('Dark mode classes:', document.body.className);
     }
     
     applyLargeTimer() {
