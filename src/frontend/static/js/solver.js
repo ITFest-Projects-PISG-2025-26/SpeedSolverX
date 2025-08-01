@@ -71,6 +71,7 @@ class CubeSolver {
             // Face navigation
             const prevBtn = document.getElementById('prevFaceBtn');
             const nextBtn = document.getElementById('nextFaceBtn');
+            console.log('Navigation buttons found:', { prevBtn: !!prevBtn, nextBtn: !!nextBtn });
             if (prevBtn) prevBtn.addEventListener('click', () => this.previousFace());
             if (nextBtn) nextBtn.addEventListener('click', () => this.nextFace());
 
@@ -272,6 +273,24 @@ class CubeSolver {
             faceNameElement.textContent = this.faceNames[currentFace];
         }
         
+        // Update face counter
+        const faceCounterElement = document.getElementById('faceCounter');
+        if (faceCounterElement) {
+            faceCounterElement.textContent = `${this.currentFaceIndex + 1} / 6`;
+        }
+        
+        // Update navigation button states
+        const prevBtn = document.getElementById('prevFaceBtn');
+        const nextBtn = document.getElementById('nextFaceBtn');
+        
+        if (prevBtn) {
+            prevBtn.disabled = this.currentFaceIndex === 0;
+        }
+        
+        if (nextBtn) {
+            nextBtn.disabled = this.currentFaceIndex === 5;
+        }
+        
         // Update face colors
         const squares = document.querySelectorAll('.cube-square');
         squares.forEach((square, index) => {
@@ -302,20 +321,28 @@ class CubeSolver {
     }
 
     previousFace() {
+        console.log('previousFace called, currentFaceIndex:', this.currentFaceIndex);
         if (this.currentFaceIndex > 0) {
             this.currentFaceIndex--;
+            console.log('Moving to face:', this.currentFaceIndex);
             this.updateFaceDisplay();
             this.updateProgressIndicator();
             this.update3DView();
+        } else {
+            console.log('Already at first face');
         }
     }
 
     nextFace() {
+        console.log('nextFace called, currentFaceIndex:', this.currentFaceIndex);
         if (this.currentFaceIndex < 5) {
             this.currentFaceIndex++;
+            console.log('Moving to face:', this.currentFaceIndex);
             this.updateFaceDisplay();
             this.updateProgressIndicator();
             this.update3DView();
+        } else {
+            console.log('Already at last face');
         }
     }
 
