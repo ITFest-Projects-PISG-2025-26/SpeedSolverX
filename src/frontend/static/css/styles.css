@@ -597,6 +597,38 @@ input:checked + .slider:before {
     color: #333;
 }
 
+/* Chart Section */
+.chart-section {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+}
+
+.chart-section h3 {
+    margin-bottom: 1.5rem;
+    color: #333;
+    font-size: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.chart-container {
+    background: white;
+    border-radius: 10px;
+    padding: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    position: relative;
+    height: 400px;
+}
+
+.chart-container canvas {
+    max-height: 100%;
+}
+
 /* History Section */
 .history-section {
     background: rgba(255, 255, 255, 0.95);

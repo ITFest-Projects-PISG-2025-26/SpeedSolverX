@@ -1,4 +1,7 @@
 function initializeStatsPage(solvesData) {
+    // Initialize the times chart
+    initializeTimesChart(solvesData);
+    
     // Calculate target progress
     function calculateTargetProgress() {
         const solves = solvesData || [];
@@ -59,4 +62,141 @@ function deleteSolve(index) {
             alert('Failed to delete solve. Please try again.');
         });
     }
+}
+
+function initializeTimesChart(solvesData) {
+    const ctx = document.getElementById('timesChart');
+    if (!ctx || !solvesData || solvesData.length === 0) {
+        return;
+    }
+
+    // Prepare data for the chart
+    const chartData = solvesData.map((solve, index) => {
+        let time = solve.time;
+        if (solve.dnf) {
+            return null; // DNF times will be gaps in the chart
+        }
+        if (solve.plus2) {
+            time += 2;
+        }
+        return {
+            x: index + 1,
+            y: time
+        };
+    }).filter(point => point !== null);
+
+    // Calculate rolling averages for trend lines
+    const ao5Data = [];
+    const ao12Data = [];
+    
+    for (let i = 4; i < chartData.length; i++) {
+        const last5 = chartData.slice(i - 4, i + 1).map(p => p.y).sort((a, b) => a - b);
+        if (last5.length === 5) {
+            // Remove best and worst for Ao5
+            const ao5 = last5.slice(1, 4).reduce((sum, time) => sum + time, 0) / 3;
+            ao5Data.push({ x: chartData[i].x, y: ao5 });
+        }
+    }
+    
+    for (let i = 11; i < chartData.length; i++) {
+        const last12 = chartData.slice(i - 11, i + 1).map(p => p.y).sort((a, b) => a - b);
+        if (last12.length === 12) {
+            // Remove best and worst for Ao12
+            const ao12 = last12.slice(1, 11).reduce((sum, time) => sum + time, 0) / 10;
+            ao12Data.push({ x: chartData[i].x, y: ao12 });
+        }
+    }
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            datasets: [
+                {
+                    label: 'Solve Times',
+                    data: chartData,
+                    borderColor: '#3498db',
+                    backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                    borderWidth: 2,
+                    fill: false,
+                    tension: 0.1,
+                    pointRadius: 3,
+                    pointHoverRadius: 5
+                },
+                {
+                    label: 'Ao5 (Average of 5)',
+                    data: ao5Data,
+                    borderColor: '#e74c3c',
+                    backgroundColor: 'transparent',
+                    borderWidth: 2,
+                    fill: false,
+                    tension: 0.3,
+                    pointRadius: 0,
+                    pointHoverRadius: 3
+                },
+                {
+                    label: 'Ao12 (Average of 12)',
+                    data: ao12Data,
+                    borderColor: '#9b59b6',
+                    backgroundColor: 'transparent',
+                    borderWidth: 2,
+                    fill: false,
+                    tension: 0.3,
+                    pointRadius: 0,
+                    pointHoverRadius: 3
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Solve Times Progress',
+                    font: {
+                        size: 16,
+                        weight: 'bold'
+                    }
+                },
+                legend: {
+                    display: true,
+                    position: 'top'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const time = context.parsed.y;
+                            return `${context.dataset.label}: ${time.toFixed(3)}s`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    type: 'linear',
+                    title: {
+                        display: true,
+                        text: 'Solve Number'
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Time (seconds)'
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    },
+                    beginAtZero: false
+                }
+            }
+        }
+    });
 }
