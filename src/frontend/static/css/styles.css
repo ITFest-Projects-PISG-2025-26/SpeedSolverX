@@ -204,6 +204,8 @@ input:checked + .slider:before {
     margin: 1rem 0;
     font-family: 'Courier New', monospace;
     letter-spacing: 2px;
+    min-width: 280px;
+    text-align: center;
 }
 
 .timer.running {
@@ -1994,6 +1996,7 @@ input:checked + .slider:before {
 /* Large Timer */
 .large-timer .timer {
     font-size: 6rem;
+    min-width: 400px;
 }
 
 .large-timer .inspection-timer {

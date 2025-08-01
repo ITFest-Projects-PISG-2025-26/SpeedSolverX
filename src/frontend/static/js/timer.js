@@ -248,9 +248,9 @@ class CubingTimer {
         
         this.interval = setInterval(() => {
             const elapsed = (Date.now() - this.startTime) / 1000;
-            const precision = this.settings.milliseconds ? 3 : 3;
-            this.timerElement.textContent = elapsed.toFixed(precision);
-        }, 10);
+            // Always show 3 decimal places for millisecond precision
+            this.timerElement.textContent = elapsed.toFixed(3);
+        }, 1);
         
         console.log('Timer: Main timer started successfully');
     }
