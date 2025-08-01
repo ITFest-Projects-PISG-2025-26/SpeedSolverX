@@ -1,25 +1,27 @@
 class SettingsManager {
     constructor() {
-        this.defaultSettings = {
-            inspection: false,
-            autoScramble: true,
-            sound: false,
-            holdToStart: true,
-            darkMode: false,
-            largeTimer: false,
-            milliseconds: false,
-            hideScramble: false,
-            realtimeStats: true,
-            pbNotifications: true,
-            advancedAverages: false,
-            scrambleLength: 20,
-            cubeType: '3x3'
-        };
-        
-        this.settings = this.loadSettings();
+        // Wait for global settings to be ready
+        if (window.globalSettings) {
+            this.init();
+        } else {
+            document.addEventListener('DOMContentLoaded', () => {
+                setTimeout(() => this.init(), 100); // Small delay to ensure global settings is ready
+            });
+        }
+    }
+    
+    init() {
+        this.globalSettings = window.globalSettings;
+        this.settings = this.globalSettings.getAllSettings();
         this.initializeElements();
         this.bindEvents();
         this.applySettings();
+        
+        // Listen for settings changes from other sources
+        window.addEventListener('settingsChanged', (e) => {
+            this.settings = e.detail.allSettings;
+            this.updateUIFromSettings();
+        });
     }
     
     initializeElements() {
@@ -88,21 +90,14 @@ class SettingsManager {
     
     updateSetting(key, value) {
         this.settings[key] = value;
-        this.saveSettings();
-        this.applySingleSetting(key, value);
-    }
-    
-    saveSettings() {
-        localStorage.setItem('speedsolverx_settings', JSON.stringify(this.settings));
+        // Use global settings to update
+        this.globalSettings.updateSetting(key, value);
         this.showNotification('Settings saved successfully!', 'success');
     }
     
-    applySettings() {
-        // Apply all settings to UI elements
+    updateUIFromSettings() {
+        // Update UI elements when settings change from external source
         Object.keys(this.settings).forEach(key => {
-            this.applySingleSetting(key, this.settings[key]);
-            
-            // Update UI elements
             const element = this.elements[key + 'Toggle'] || 
                            this.elements[key + 'Input'] || 
                            this.elements[key + 'Select'];
@@ -115,6 +110,16 @@ class SettingsManager {
                 }
             }
         });
+    }
+    
+    saveSettings() {
+        // Settings are now saved through global settings
+        this.showNotification('Settings saved successfully!', 'success');
+    }
+    
+    applySettings() {
+        // Apply all settings to UI elements
+        this.updateUIFromSettings();
     }
     
     applySingleSetting(key, value) {
@@ -218,9 +223,12 @@ class SettingsManager {
     
     resetSettings() {
         if (confirm('Are you sure you want to reset all settings to default values?')) {
-            this.settings = { ...this.defaultSettings };
-            this.saveSettings();
-            this.applySettings();
+            // Reset through global settings
+            Object.keys(this.globalSettings.defaultSettings).forEach(key => {
+                this.globalSettings.updateSetting(key, this.globalSettings.defaultSettings[key]);
+            });
+            this.settings = this.globalSettings.getAllSettings();
+            this.updateUIFromSettings();
             this.showNotification('Settings reset to defaults!', 'success');
         }
     }
@@ -247,6 +255,74 @@ class SettingsManager {
         notification.querySelector('.notification-close').addEventListener('click', () => {
             notification.remove();
         });
+    }
+    
+    exportData() {
+        const data = {
+            settings: this.settings,
+            solves: JSON.parse(localStorage.getItem('recentSolves') || '[]'),
+            exportDate: new Date().toISOString(),
+            version: '1.0'
+        };
+        
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `speedsolverx_data_${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        
+        this.showNotification('Data exported successfully!', 'success');
+    }
+    
+    importData() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json';
+        
+        input.onchange = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    if (data.settings) {
+                        Object.keys(data.settings).forEach(key => {
+                            this.globalSettings.updateSetting(key, data.settings[key]);
+                        });
+                        this.settings = this.globalSettings.getAllSettings();
+                        this.updateUIFromSettings();
+                    }
+                    
+                    if (data.solves) {
+                        localStorage.setItem('recentSolves', JSON.stringify(data.solves));
+                    }
+                    
+                    this.showNotification('Data imported successfully!', 'success');
+                } catch (error) {
+                    this.showNotification('Failed to import data. Invalid file format.', 'error');
+                }
+            };
+            reader.readAsText(file);
+        };
+        
+        input.click();
+    }
+    
+    clearStats() {
+        if (confirm('Are you sure you want to clear all statistics? This action cannot be undone.')) {
+            localStorage.removeItem('recentSolves');
+            this.showNotification('Statistics cleared successfully!', 'success');
+            
+            // Refresh the page if on stats page
+            if (window.location.pathname === '/stats') {
+                window.location.reload();
+            }
+        }
     }
     
     // Public methods for other components
