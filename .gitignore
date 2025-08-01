@@ -56,3 +56,5 @@ desktop.ini
 # Temporary files
 *.tmp
 *.temp
+
+# Note: requirements.txt is kept in root for deployment compatibility
