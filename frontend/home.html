@@ -1,0 +1,12 @@
+<h2>Welcome, {{ current_user.id }}!</h2>
+<form method="POST" action="/solve">
+  <input name="cube" placeholder="Cube state string" required>
+  <button type="submit">Solve</button>
+</form>
+{% if solution %}<p>Solution: {{ solution }}</p>{% endif %}
+<button onclick="startTimer()">Start Timer</button>
+<button onclick="stopTimer()">Stop Timer</button>
+<p id="timer">0.00s</p>
+<a href="/logout">Logout</a>
+<script src="/static/timer.js"></script>
+<link rel="stylesheet" href="/static/styles.css">
