@@ -41,10 +41,6 @@
                     <i class="fas fa-camera"></i>
                     Camera Input
                 </button>
-                <button id="textInputBtn" class="method-btn">
-                    <i class="fas fa-keyboard"></i>
-                    Text Input
-                </button>
             </div>
         </div>
 
@@ -153,39 +149,6 @@
                 <div class="captured-faces" id="capturedFaces">
                     <!-- Captured face previews will appear here -->
                 </div>
-            </div>
-        </div>
-
-        <!-- Text Input Section -->
-        <div id="textInputSection" class="input-section">
-            <div class="text-input-container">
-                <h4>Text Input Method</h4>
-                <p>Enter the cube state as a 54-character string representing all faces</p>
-                
-                <div class="text-input-help">
-                    <h5>Color Mapping:</h5>
-                    <div class="color-mapping">
-                        <span class="mapping-item"><span class="color-sample white"></span> W = White</span>
-                        <span class="mapping-item"><span class="color-sample yellow"></span> Y = Yellow</span>
-                        <span class="mapping-item"><span class="color-sample blue"></span> B = Blue</span>
-                        <span class="mapping-item"><span class="color-sample green"></span> G = Green</span>
-                        <span class="mapping-item"><span class="color-sample red"></span> R = Red</span>
-                        <span class="mapping-item"><span class="color-sample orange"></span> O = Orange</span>
-                    </div>
-                </div>
-
-                <form method="POST" action="/solve" class="text-solver-form">
-                    <div class="input-group">
-                        <label for="cubeString">Cube State (54 characters):</label>
-                        <textarea name="cube" id="cubeString" placeholder="Enter cube state: WWWWWWWWWRRRRRRRRRBBBBBBBBBOOOOOOOOOYYYYYYYYYGGGGGGGG" required class="cube-text-input"></textarea>
-                        <div class="input-info">
-                            <span id="charCount">0</span> / 54 characters
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-magic"></i> Solve Cube
-                    </button>
-                </form>
             </div>
         </div>
 

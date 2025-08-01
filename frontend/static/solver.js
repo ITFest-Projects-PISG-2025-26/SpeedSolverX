@@ -48,7 +48,6 @@ class CubeSolver {
         // Input method switching
         document.getElementById('visualInputBtn').addEventListener('click', () => this.switchInputMethod('visual'));
         document.getElementById('cameraInputBtn').addEventListener('click', () => this.switchInputMethod('camera'));
-        document.getElementById('textInputBtn').addEventListener('click', () => this.switchInputMethod('text'));
 
         // Color palette
         document.querySelectorAll('.color-option').forEach(option => {
@@ -67,12 +66,6 @@ class CubeSolver {
         document.getElementById('startCameraBtn').addEventListener('click', () => this.startCamera());
         document.getElementById('captureBtn').addEventListener('click', () => this.captureFrame());
         document.getElementById('stopCameraBtn').addEventListener('click', () => this.stopCamera());
-
-        // Text input
-        const cubeTextInput = document.getElementById('cubeString');
-        if (cubeTextInput) {
-            cubeTextInput.addEventListener('input', this.updateCharCount);
-        }
 
         // Solution controls
         const copySolutionBtn = document.getElementById('copySolutionBtn');
@@ -241,6 +234,18 @@ class CubeSolver {
     async solveCube() {
         const cubeString = this.convertCubeStateToString();
         
+        // Validate cube state before sending
+        if (cubeString.length !== 54) {
+            alert('Invalid cube state. Please ensure all faces are properly configured.');
+            return;
+        }
+        
+        // Show loading state
+        const solveBtn = document.getElementById('solveCubeBtn');
+        const originalText = solveBtn.innerHTML;
+        solveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Solving...';
+        solveBtn.disabled = true;
+        
         try {
             const response = await fetch('/solve', {
                 method: 'POST',
@@ -254,11 +259,16 @@ class CubeSolver {
                 const result = await response.text();
                 this.displaySolution(result);
             } else {
-                throw new Error('Failed to solve cube');
+                const errorText = await response.text();
+                throw new Error(`Server error: ${response.status} - ${errorText}`);
             }
         } catch (error) {
             console.error('Error solving cube:', error);
-            alert('Error solving cube. Please check your input and try again.');
+            alert(`Error solving cube: ${error.message}\n\nPlease check your cube configuration and try again.`);
+        } finally {
+            // Reset button state
+            solveBtn.innerHTML = originalText;
+            solveBtn.disabled = false;
         }
     }
 
@@ -284,6 +294,9 @@ class CubeSolver {
                 cubeString += faceMapping[color];
             });
         });
+        
+        console.log('Generated cube string:', cubeString);
+        console.log('Cube state:', this.cubeState);
         
         return cubeString;
     }
@@ -430,15 +443,6 @@ class CubeSolver {
         
         // Clear captured faces
         document.getElementById('capturedFaces').innerHTML = '';
-    }
-
-    updateCharCount() {
-        const input = document.getElementById('cubeString');
-        const counter = document.getElementById('charCount');
-        if (input && counter) {
-            counter.textContent = input.value.length;
-            counter.style.color = input.value.length === 54 ? '#00cc00' : '#666';
-        }
     }
 }
 
