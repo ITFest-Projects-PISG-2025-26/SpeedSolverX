@@ -35,12 +35,25 @@ class GlobalSettings {
     }
     
     applyGlobalSettings() {
-        // Apply visual settings that affect all pages
-        this.applyDarkMode();
-        this.applyLargeTimer();
-        this.applyCustomStyles();
+        // Check if DOM is ready before applying settings
+        if (!document.body) {
+            console.log('DOM not ready, deferring global settings application');
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', () => this.applyGlobalSettings());
+            }
+            return;
+        }
         
-        console.log('Global settings applied:', this.settings);
+        try {
+            // Apply visual settings that affect all pages
+            this.applyDarkMode();
+            this.applyLargeTimer();
+            this.applyCustomStyles();
+            
+            console.log('Global settings applied:', this.settings);
+        } catch (error) {
+            console.error('Error applying global settings:', error);
+        }
         
         // Listen for settings changes from other pages
         window.addEventListener('storage', (e) => {
@@ -53,43 +66,75 @@ class GlobalSettings {
     }
     
     applyDarkMode() {
+        // Check if document.body exists before trying to access it
+        if (!document.body) {
+            console.log('Document body not ready, deferring dark mode application');
+            // Wait for DOM to be ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', () => this.applyDarkMode());
+            }
+            return;
+        }
+        
         console.log('Applying dark mode:', this.settings.darkMode);
         console.log('Current body classes before:', document.body.className);
         
-        if (this.settings.darkMode) {
-            document.body.classList.add('dark-mode');
-            document.documentElement.setAttribute('data-theme', 'dark');
-            console.log('Dark mode ENABLED - added dark-mode class');
-        } else {
-            document.body.classList.remove('dark-mode');
-            document.documentElement.setAttribute('data-theme', 'light');
-            console.log('Dark mode DISABLED - removed dark-mode class');
+        try {
+            if (this.settings.darkMode) {
+                document.body.classList.add('dark-mode');
+                document.documentElement.setAttribute('data-theme', 'dark');
+                console.log('Dark mode ENABLED - added dark-mode class');
+            } else {
+                document.body.classList.remove('dark-mode');
+                document.documentElement.setAttribute('data-theme', 'light');
+                console.log('Dark mode DISABLED - removed dark-mode class');
+            }
+            
+            console.log('Current body classes after:', document.body.className);
+            console.log('Document theme attribute:', document.documentElement.getAttribute('data-theme'));
+        } catch (error) {
+            console.error('Error applying dark mode:', error);
         }
-        
-        console.log('Current body classes after:', document.body.className);
-        console.log('Document theme attribute:', document.documentElement.getAttribute('data-theme'));
     }
     
     applyLargeTimer() {
-        if (this.settings.largeTimer) {
-            document.body.classList.add('large-timer');
-        } else {
-            document.body.classList.remove('large-timer');
+        if (!document.body) {
+            console.log('Document body not ready for large timer application');
+            return;
+        }
+        
+        try {
+            if (this.settings.largeTimer) {
+                document.body.classList.add('large-timer');
+            } else {
+                document.body.classList.remove('large-timer');
+            }
+        } catch (error) {
+            console.error('Error applying large timer setting:', error);
         }
     }
     
     applyCustomStyles() {
-        // Apply other visual preferences
-        if (this.settings.milliseconds) {
-            document.body.classList.add('show-milliseconds');
-        } else {
-            document.body.classList.remove('show-milliseconds');
+        if (!document.body) {
+            console.log('Document body not ready for custom styles application');
+            return;
         }
         
-        if (this.settings.hideScramble) {
-            document.body.classList.add('hide-scramble');
-        } else {
-            document.body.classList.remove('hide-scramble');
+        try {
+            // Apply other visual preferences
+            if (this.settings.milliseconds) {
+                document.body.classList.add('show-milliseconds');
+            } else {
+                document.body.classList.remove('show-milliseconds');
+            }
+            
+            if (this.settings.hideScramble) {
+                document.body.classList.add('hide-scramble');
+            } else {
+                document.body.classList.remove('hide-scramble');
+            }
+        } catch (error) {
+            console.error('Error applying custom styles:', error);
         }
     }
     
@@ -191,13 +236,26 @@ class GlobalSettings {
     }
 }
 
-// Initialize global settings immediately
-window.globalSettings = new GlobalSettings();
-
-// Expose settings to global scope for other scripts
-window.getSettings = () => window.globalSettings.getAllSettings();
-window.getSetting = (key) => window.globalSettings.getSetting(key);
-window.updateSetting = (key, value) => window.globalSettings.updateSetting(key, value);
+// Initialize global settings when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('DOM loaded, initializing GlobalSettings');
+        window.globalSettings = new GlobalSettings();
+        
+        // Expose settings to global scope for other scripts
+        window.getSettings = () => window.globalSettings.getAllSettings();
+        window.getSetting = (key) => window.globalSettings.getSetting(key);
+        window.updateSetting = (key, value) => window.globalSettings.updateSetting(key, value);
+    });
+} else {
+    console.log('DOM already loaded, initializing GlobalSettings immediately');
+    window.globalSettings = new GlobalSettings();
+    
+    // Expose settings to global scope for other scripts
+    window.getSettings = () => window.globalSettings.getAllSettings();
+    window.getSetting = (key) => window.globalSettings.getSetting(key);
+    window.updateSetting = (key, value) => window.globalSettings.updateSetting(key, value);
+}
 
 // Auto-refresh settings when page becomes visible (for better cross-tab sync)
 document.addEventListener('visibilitychange', () => {
