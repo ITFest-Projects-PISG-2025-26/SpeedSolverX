@@ -715,6 +715,8 @@ input:checked + .slider:before {
     padding: 3rem;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
     text-align: center;
+    position: relative;
+    z-index: 10;
 }
 
 .auth-header .logo {
@@ -943,6 +945,7 @@ input:checked + .slider:before {
     bottom: 0;
     z-index: 1;
     overflow: hidden;
+    pointer-events: none;
 }
 
 /* Add cube animation for login/signup pages */
@@ -953,6 +956,7 @@ input:checked + .slider:before {
     background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
     opacity: 0.1;
     animation: float 6s ease-in-out infinite;
+    pointer-events: none;
 }
 
 .floating-cube:nth-child(1) { top: 20%; left: 10%; animation-delay: 0s; }
