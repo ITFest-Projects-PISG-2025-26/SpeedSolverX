@@ -14,21 +14,13 @@
             <div class="nav-user">
                 <span>Welcome, {{ current_user.id }}!</span>
                 <a href="/stats" class="nav-link"><i class="fas fa-chart-line"></i> Stats</a>
+                <a href="/settings" class="nav-link"><i class="fas fa-cog"></i> Settings</a>
                 <a href="/logout" class="nav-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
             </div>
         </div>
     </nav>
 
     <div class="container">
-        <!-- Inspection Toggle -->
-        <div class="settings-panel">
-            <label class="switch">
-                <input type="checkbox" id="inspectionToggle">
-                <span class="slider"></span>
-            </label>
-            <span class="setting-label">Inspection (15s)</span>
-        </div>
-
         <!-- Scramble Section -->
         <div class="scramble-section">
             <div class="scramble-header">

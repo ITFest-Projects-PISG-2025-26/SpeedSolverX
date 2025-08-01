@@ -11,9 +11,36 @@ class CubingTimer {
         this.keyPressed = false;
         this.holdTimer = null;
         
+        // Settings integration
+        this.settings = {
+            inspection: false,
+            autoScramble: true,
+            sound: false,
+            holdToStart: true,
+            scrambleLength: 20,
+            cubeType: '3x3'
+        };
+        
+        this.loadSettings();
         this.initializeElements();
         this.bindEvents();
         this.loadRecentSolves();
+    }
+    
+    loadSettings() {
+        if (window.settingsManager) {
+            this.settings = window.settingsManager.getAllSettings();
+        } else {
+            // Fallback to localStorage
+            const saved = localStorage.getItem('speedsolverx_settings');
+            if (saved) {
+                try {
+                    this.settings = { ...this.settings, ...JSON.parse(saved) };
+                } catch (e) {
+                    console.error('Failed to load settings:', e);
+                }
+            }
+        }
     }
     
     initializeElements() {
@@ -21,7 +48,6 @@ class CubingTimer {
         this.inspectionElement = document.getElementById('inspectionTimer');
         this.scrambleElement = document.getElementById('scrambleDisplay');
         this.newScrambleBtn = document.getElementById('newScrambleBtn');
-        this.inspectionToggle = document.getElementById('inspectionToggle');
         this.resetBtn = document.getElementById('resetBtn');
         this.plus2Btn = document.getElementById('plus2Btn');
         this.dnfBtn = document.getElementById('dnfBtn');
@@ -56,15 +82,23 @@ class CubingTimer {
                 this.startMainTimer();
             } else {
                 // Start hold timer for reset/start
-                this.holdTimer = setTimeout(() => {
-                    if (this.inspectionToggle?.checked) {
+                if (this.settings.holdToStart) {
+                    this.holdTimer = setTimeout(() => {
+                        if (this.settings.inspection) {
+                            this.startInspection();
+                        } else {
+                            this.startMainTimer();
+                        }
+                    }, 100);
+                    
+                    this.timerElement.style.color = '#f39c12';
+                } else {
+                    if (this.settings.inspection) {
                         this.startInspection();
                     } else {
                         this.startMainTimer();
                     }
-                }, 100);
-                
-                this.timerElement.style.color = '#f39c12';
+                }
             }
         }
     }
@@ -92,6 +126,10 @@ class CubingTimer {
         this.inspectionElement.textContent = this.inspectionTime;
         this.timerElement.classList.add('inspection');
         
+        if (this.settings.hideScramble) {
+            this.scrambleElement.style.opacity = '0.3';
+        }
+        
         this.inspectionInterval = setInterval(() => {
             this.inspectionTime--;
             this.inspectionElement.textContent = this.inspectionTime;
@@ -99,12 +137,20 @@ class CubingTimer {
             if (this.inspectionTime <= 0) {
                 this.inspectionElement.textContent = '+2';
                 this.inspectionElement.style.color = '#e74c3c';
+                
+                if (this.settings.sound) {
+                    this.playSound('warning');
+                }
             }
             
             if (this.inspectionTime <= -2) {
                 this.inspectionElement.textContent = 'DNF';
                 this.applyPenalty('dnf');
                 this.resetTimer();
+                
+                if (this.settings.sound) {
+                    this.playSound('error');
+                }
             }
         }, 1000);
     }
@@ -115,15 +161,24 @@ class CubingTimer {
             this.inspectionElement.style.display = 'none';
             this.isInspecting = false;
             this.timerElement.classList.remove('inspection');
+            
+            if (this.settings.hideScramble) {
+                this.scrambleElement.style.opacity = '0.1';
+            }
         }
         
         this.isRunning = true;
         this.startTime = Date.now();
         this.timerElement.classList.add('running');
         
+        if (this.settings.sound) {
+            this.playSound('start');
+        }
+        
         this.interval = setInterval(() => {
             const elapsed = (Date.now() - this.startTime) / 1000;
-            this.timerElement.textContent = elapsed.toFixed(2);
+            const precision = this.settings.milliseconds ? 3 : 2;
+            this.timerElement.textContent = elapsed.toFixed(precision);
         }, 10);
     }
     
@@ -136,14 +191,25 @@ class CubingTimer {
         const finalTime = (Date.now() - this.startTime) / 1000;
         this.timerElement.classList.remove('running');
         
+        if (this.settings.hideScramble) {
+            this.scrambleElement.style.opacity = '1';
+        }
+        
+        if (this.settings.sound) {
+            this.playSound('stop');
+        }
+        
         // Apply inspection penalty if applicable
         let penalty = null;
-        if (this.inspectionToggle?.checked && this.inspectionTime <= 0 && this.inspectionTime > -2) {
+        if (this.settings.inspection && this.inspectionTime <= 0 && this.inspectionTime > -2) {
             penalty = 'plus2';
         }
         
         this.recordSolve(finalTime, penalty);
-        this.generateNewScramble();
+        
+        if (this.settings.autoScramble) {
+            this.generateNewScramble();
+        }
     }
     
     resetTimer() {
@@ -158,6 +224,10 @@ class CubingTimer {
         this.timerElement.className = 'timer';
         this.inspectionElement.style.display = 'none';
         this.inspectionElement.style.color = '#e74c3c';
+        
+        if (this.scrambleElement) {
+            this.scrambleElement.style.opacity = '1';
+        }
     }
     
     async generateNewScramble() {
@@ -179,7 +249,9 @@ class CubingTimer {
         const scramble = [];
         let lastMove = null;
         
-        for (let i = 0; i < 20; i++) {
+        const length = this.settings.scrambleLength || 20;
+        
+        for (let i = 0; i < length; i++) {
             let move = moves[Math.floor(Math.random() * moves.length)];
             while (move === lastMove) {
                 move = moves[Math.floor(Math.random() * moves.length)];
@@ -191,6 +263,37 @@ class CubingTimer {
         }
         
         return scramble.join(' ');
+    }
+    
+    playSound(type) {
+        // Simple beep sounds using Web Audio API
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        switch (type) {
+            case 'start':
+                oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                break;
+            case 'stop':
+                oscillator.frequency.setValueAtTime(600, audioContext.currentTime);
+                break;
+            case 'warning':
+                oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
+                break;
+            case 'error':
+                oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
+                break;
+        }
+        
+        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+        
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.1);
     }
     
     recordSolve(time, penalty = null) {

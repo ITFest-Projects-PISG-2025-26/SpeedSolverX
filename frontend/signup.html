@@ -1,5 +1,97 @@
-<form action="/signup" method="POST">
-  <input name="username" placeholder="Username" required>
-  <input type="password" name="password" placeholder="Password" required>
-  <button type="submit">Create Account</button>
-</form>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - SpeedSolverX</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="auth-body">
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="logo">
+                    <i class="fas fa-cube"></i>
+                    <h1>SpeedSolverX</h1>
+                </div>
+                <p class="auth-subtitle">Join the speedcubing community!</p>
+            </div>
+            
+            <form action="/signup" method="POST" class="auth-form">
+                <div class="form-group">
+                    <div class="input-wrapper">
+                        <i class="fas fa-user"></i>
+                        <input name="username" placeholder="Choose a username" required class="auth-input">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" name="password" placeholder="Create a password" required class="auth-input">
+                    </div>
+                </div>
+                
+                <button type="submit" class="auth-btn primary">
+                    <i class="fas fa-user-plus"></i>
+                    Create Account
+                </button>
+            </form>
+            
+            <div class="auth-footer">
+                <p>Already have an account?</p>
+                <a href="/login" class="auth-link">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Login
+                </a>
+            </div>
+            
+            <div class="auth-benefits">
+                <h3>Why Join SpeedSolverX?</h3>
+                <div class="benefits-list">
+                    <div class="benefit-item">
+                        <i class="fas fa-trophy"></i>
+                        <div>
+                            <strong>Track Your Progress</strong>
+                            <p>Monitor your improvement with detailed statistics and averages</p>
+                        </div>
+                    </div>
+                    <div class="benefit-item">
+                        <i class="fas fa-users"></i>
+                        <div>
+                            <strong>Join the Community</strong>
+                            <p>Connect with speedcubers worldwide and share your achievements</p>
+                        </div>
+                    </div>
+                    <div class="benefit-item">
+                        <i class="fas fa-chart-bar"></i>
+                        <div>
+                            <strong>Analyze Performance</strong>
+                            <p>Get insights into your solving patterns and identify areas for improvement</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="auth-background">
+            <div class="floating-cube cube-1">
+                <i class="fas fa-cube"></i>
+            </div>
+            <div class="floating-cube cube-2">
+                <i class="fas fa-cube"></i>
+            </div>
+            <div class="floating-cube cube-3">
+                <i class="fas fa-cube"></i>
+            </div>
+            <div class="floating-cube cube-4">
+                <i class="fas fa-cube"></i>
+            </div>
+            <div class="floating-cube cube-5">
+                <i class="fas fa-cube"></i>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

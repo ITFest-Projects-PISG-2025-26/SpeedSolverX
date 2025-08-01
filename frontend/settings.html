@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - SpeedSolverX</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="nav-title">SpeedSolverX</h1>
+            <div class="nav-user">
+                <span>Welcome, {{ current_user.id }}!</span>
+                <a href="/" class="nav-link"><i class="fas fa-home"></i> Timer</a>
+                <a href="/stats" class="nav-link"><i class="fas fa-chart-line"></i> Stats</a>
+                <a href="/logout" class="nav-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="settings-header">
+            <h2><i class="fas fa-cog"></i> Settings</h2>
+            <p>Customize your speedcubing experience</p>
+        </div>
+
+        <!-- Timer Settings -->
+        <div class="settings-section">
+            <h3><i class="fas fa-stopwatch"></i> Timer Settings</h3>
+            <div class="settings-grid">
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <label class="setting-label">Inspection Time</label>
+                        <p class="setting-description">Enable 15-second inspection period before timing starts</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="inspectionToggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <label class="setting-label">Auto-Generate Scrambles</label>
+                        <p class="setting-description">Automatically generate new scrambles after each solve</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="autoScrambleToggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <label class="setting-label">Sound Effects</label>
+                        <p class="setting-description">Play sound effects for timer events</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="soundToggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <label class="setting-label">Hold to Start</label>
+                        <p class="setting-description">Require holding spacebar before starting timer</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="holdToStartToggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Display Settings -->
+        <div class="settings-section">
+            <h3><i class="fas fa-eye"></i> Display Settings</h3>
+            <div class="settings-grid">
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <label class="setting-label">Dark Mode</label>
+                        <p class="setting-description">Switch to dark theme for better viewing in low light</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="darkModeToggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <label class="setting-label">Large Timer</label>
+                        <p class="setting-description">Make the timer display larger and more prominent</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="largeTimerToggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <label class="setting-label">Show Milliseconds</label>
+                        <p class="setting-description">Display timer precision to 3 decimal places</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="millisecondsToggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <label class="setting-label">Hide Scramble During Solve</label>
+                        <p class="setting-description">Hide scramble text while timer is running</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="hideScrambleToggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Settings -->
+        <div class="settings-section">
+            <h3><i class="fas fa-chart-bar"></i> Statistics Settings</h3>
+            <div class="settings-grid">
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <label class="setting-label">Real-time Stats</label>
+                        <p class="setting-description">Show current averages on the main timer page</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="realtimeStatsToggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <label class="setting-label">Personal Best Notifications</label>
+                        <p class="setting-description">Show notifications when you achieve a new personal best</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="pbNotificationsToggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <label class="setting-label">Advanced Averages</label>
+                        <p class="setting-description">Show additional averages like Ao200, Ao500, etc.</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="advancedAveragesToggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scramble Settings -->
+        <div class="settings-section">
+            <h3><i class="fas fa-random"></i> Scramble Settings</h3>
+            <div class="settings-grid">
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <label class="setting-label">Scramble Length</label>
+                        <p class="setting-description">Number of moves in generated scrambles</p>
+                    </div>
+                    <div class="number-input">
+                        <input type="number" id="scrambleLengthInput" value="20" min="15" max="30" class="setting-number">
+                        <span class="number-unit">moves</span>
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <label class="setting-label">Cube Type</label>
+                        <p class="setting-description">Select the cube type for scrambles</p>
+                    </div>
+                    <select id="cubeTypeSelect" class="setting-select">
+                        <option value="3x3">3x3x3</option>
+                        <option value="2x2">2x2x2</option>
+                        <option value="4x4">4x4x4</option>
+                        <option value="5x5">5x5x5</option>
+                        <option value="pyraminx">Pyraminx</option>
+                        <option value="skewb">Skewb</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Management -->
+        <div class="settings-section">
+            <h3><i class="fas fa-database"></i> Data Management</h3>
+            <div class="settings-actions">
+                <button class="btn btn-secondary" id="exportDataBtn">
+                    <i class="fas fa-download"></i>
+                    Export Solve Data
+                </button>
+                
+                <button class="btn btn-secondary" id="importDataBtn">
+                    <i class="fas fa-upload"></i>
+                    Import Solve Data
+                </button>
+                
+                <button class="btn btn-warning" id="clearStatsBtn">
+                    <i class="fas fa-trash-alt"></i>
+                    Clear All Statistics
+                </button>
+                
+                <button class="btn btn-danger" id="resetSettingsBtn">
+                    <i class="fas fa-undo"></i>
+                    Reset to Defaults
+                </button>
+            </div>
+        </div>
+
+        <!-- Save Settings -->
+        <div class="settings-footer">
+            <button class="btn btn-primary" id="saveSettingsBtn">
+                <i class="fas fa-save"></i>
+                Save Settings
+            </button>
+            <p class="settings-note">Settings are automatically saved when changed</p>
+        </div>
+    </div>
+
+    <script src="/static/settings.js"></script>
+</body>
+</html>
