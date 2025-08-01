@@ -14,14 +14,14 @@ class CubingTimer {
         
         // Settings integration
         this.settings = {
-            inspection: false,
+            inspection: true,
             autoScramble: true,
-            sound: false,
+            sound: true,
             holdToStart: true,
             scrambleLength: 20,
             cubeType: '3x3',
             hideScramble: false,
-            milliseconds: false
+            milliseconds: true
         };
         
         console.log('Timer: Loading settings...');
@@ -192,12 +192,25 @@ class CubingTimer {
                 if (this.settings.sound) {
                     this.playSound('error');
                 }
+            } else if (this.inspectionTime === 8) {
+                // 8 second warning sound
+                if (this.settings.sound) {
+                    this.playSound('inspection8');
+                }
+            } else if (this.inspectionTime === 12) {
+                // 12 second warning sound (3 seconds in)
+                if (this.settings.sound) {
+                    this.playSound('inspection12');
+                }
             } else if (this.inspectionTime <= 3) {
                 // Warning for last 3 seconds
                 this.inspectionElement.style.color = '#e74c3c';
                 if (this.settings.sound) {
                     this.playSound('warning');
                 }
+            } else if (this.inspectionTime > 3) {
+                // Reset color when not in danger zone
+                this.inspectionElement.style.color = '';
             }
         }, 1000);
         
@@ -341,6 +354,14 @@ class CubingTimer {
                 break;
             case 'error':
                 oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
+                break;
+            case 'inspection8':
+                // Higher pitch beep for 8 seconds warning
+                oscillator.frequency.setValueAtTime(700, audioContext.currentTime);
+                break;
+            case 'inspection12':
+                // Mid pitch beep for 12 seconds warning  
+                oscillator.frequency.setValueAtTime(500, audioContext.currentTime);
                 break;
         }
         

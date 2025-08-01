@@ -2,17 +2,17 @@
 class GlobalSettings {
     constructor() {
         this.defaultSettings = {
-            inspection: false,
+            inspection: true,
             autoScramble: true,
-            sound: false,
+            sound: true,
             holdToStart: true,
-            darkMode: false,
-            largeTimer: false,
-            milliseconds: false,
+            darkMode: true,
+            largeTimer: true,
+            milliseconds: true,
             hideScramble: false,
             realtimeStats: true,
             pbNotifications: true,
-            advancedAverages: false,
+            advancedAverages: true,
             scrambleLength: 20,
             cubeType: '3x3'
         };
