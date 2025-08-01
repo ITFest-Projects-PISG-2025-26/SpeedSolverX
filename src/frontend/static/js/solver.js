@@ -3,7 +3,7 @@ class CubeSolver {
     constructor() {
         this.selectedColor = 'blue';
         this.currentFaceIndex = 0;
-        this.faceOrder = ['blue', 'green', 'red', 'orange', 'yellow', 'white'];
+        this.faceOrder = ['blue', 'red', 'green', 'orange', 'yellow', 'white'];
         this.cubeState = {
             blue: new Array(9).fill('blue'),
             green: new Array(9).fill('green'),

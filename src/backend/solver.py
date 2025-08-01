@@ -78,12 +78,13 @@ def convert_to_kociemba_format(cube_state):
         }
         
         # Face order in kociemba: U R F D L B
-        # Our face order: yellow, red, blue, white, orange, green
-        face_order = ['yellow', 'red', 'blue', 'white', 'orange', 'green']
+        # Our frontend face order: blue, red, green, orange, yellow, white
+        # Convert to kociemba order: yellow, red, blue, white, orange, green  
+        frontend_to_kociemba_order = ['yellow', 'red', 'blue', 'white', 'orange', 'green']
         
         kociemba_string = ""
         
-        for face_color in face_order:
+        for face_color in frontend_to_kociemba_order:
             face_squares = cube_state[face_color]
             for square_color in face_squares:
                 kociemba_string += color_to_char[square_color]
