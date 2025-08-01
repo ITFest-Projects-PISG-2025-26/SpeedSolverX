@@ -1,12 +1,96 @@
-<h2>Welcome, {{ current_user.id }}!</h2>
-<form method="POST" action="/solve">
-  <input name="cube" placeholder="Cube state string" required>
-  <button type="submit">Solve</button>
-</form>
-{% if solution %}<p>Solution: {{ solution }}</p>{% endif %}
-<button onclick="startTimer()">Start Timer</button>
-<button onclick="stopTimer()">Stop Timer</button>
-<p id="timer">0.00s</p>
-<a href="/logout">Logout</a>
-<script src="/static/timer.js"></script>
-<link rel="stylesheet" href="/static/styles.css">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpeedSolverX - Cubing Timer</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="nav-title">SpeedSolverX</h1>
+            <div class="nav-user">
+                <span>Welcome, {{ current_user.id }}!</span>
+                <a href="/stats" class="nav-link"><i class="fas fa-chart-line"></i> Stats</a>
+                <a href="/logout" class="nav-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Inspection Toggle -->
+        <div class="settings-panel">
+            <label class="switch">
+                <input type="checkbox" id="inspectionToggle">
+                <span class="slider"></span>
+            </label>
+            <span class="setting-label">Inspection (15s)</span>
+        </div>
+
+        <!-- Scramble Section -->
+        <div class="scramble-section">
+            <div class="scramble-header">
+                <h3>Scramble</h3>
+                <button id="newScrambleBtn" class="btn btn-secondary">
+                    <i class="fas fa-redo"></i> New Scramble
+                </button>
+            </div>
+            <div id="scrambleDisplay" class="scramble-display">
+                Click "New Scramble" to generate a scramble
+            </div>
+        </div>
+
+        <!-- Timer Section -->
+        <div class="timer-section">
+            <div id="inspectionTimer" class="inspection-timer hidden">15</div>
+            <div id="timer" class="timer">0.00</div>
+            <div class="timer-controls">
+                <button id="resetBtn" class="btn btn-secondary">
+                    <i class="fas fa-undo"></i> Reset
+                </button>
+            </div>
+            <div class="timer-instructions">
+                <p>Press SPACEBAR to start/stop the timer</p>
+                <p>Hold SPACEBAR to reset</p>
+            </div>
+        </div>
+
+        <!-- Solve Input Section -->
+        <div class="solve-input-section">
+            <div class="solve-actions">
+                <button id="plus2Btn" class="btn btn-warning">+2</button>
+                <button id="dnfBtn" class="btn btn-danger">DNF</button>
+                <button id="deleteBtn" class="btn btn-secondary">Delete</button>
+            </div>
+        </div>
+
+        <!-- Recent Solves -->
+        <div class="recent-solves">
+            <h3>Recent Solves</h3>
+            <div id="solvesList" class="solves-list">
+                <!-- Solves will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Cube Solver Section -->
+        <div class="solver-section">
+            <h3>Cube Solver</h3>
+            <form method="POST" action="/solve" class="solver-form">
+                <input name="cube" placeholder="Enter cube state (54 characters)" required class="cube-input">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-magic"></i> Solve
+                </button>
+            </form>
+            {% if solution %}
+                <div class="solution-display">
+                    <strong>Solution:</strong> {{ solution }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script src="/static/timer.js"></script>
+</body>
+</html>
