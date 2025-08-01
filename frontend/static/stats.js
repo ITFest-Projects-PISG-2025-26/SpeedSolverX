@@ -30,6 +30,15 @@ function initializeStatsPage(solvesData) {
         }
     }
     
+    // Set up event delegation for delete buttons
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.delete-solve-btn')) {
+            const button = e.target.closest('.delete-solve-btn');
+            const index = button.getAttribute('data-solve-index');
+            deleteSolve(parseInt(index));
+        }
+    });
+    
     // Initialize on page load
     calculateTargetProgress();
 }
