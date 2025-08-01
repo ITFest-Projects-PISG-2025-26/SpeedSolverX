@@ -589,10 +589,38 @@ class CubeSolver {
     }
 
     processCapturedFaces() {
+        // Show processing message
+        document.getElementById('cameraInstructions').textContent = 'Processing captured faces...';
+        
         // In a real implementation, this would use computer vision
         // to detect cube colors from the captured images
-        alert('Camera cube detection is a demo feature. Please use visual input method for accurate results.');
-        this.switchInputMethod('visual');
+        
+        // For now, we'll simulate processing and then guide the user
+        setTimeout(() => {
+            const result = confirm(
+                "Camera detection is currently in development.\n\n" +
+                "Would you like to:\n" +
+                "✓ OK - Switch to Visual Input to manually enter colors\n" +
+                "✗ Cancel - Try camera capture again"
+            );
+            
+            if (result) {
+                // Switch to visual input
+                this.switchInputMethod('visual');
+                alert("Switched to Visual Input mode. Please manually enter the cube colors using the interface below.");
+            } else {
+                // Reset camera capture
+                this.resetCameraCapture();
+                document.getElementById('cameraInstructions').textContent = 'Show the Blue face to the camera';
+            }
+        }, 1500);
+    }
+    
+    resetCameraCapture() {
+        // Reset face index and clear captured faces
+        this.currentFaceIndex = 0;
+        document.getElementById('capturedFaces').innerHTML = '';
+        this.updateCameraInstructions();
     }
 
     stopCamera() {
