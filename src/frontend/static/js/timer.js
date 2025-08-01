@@ -2,8 +2,8 @@ class CubingTimer {
     constructor() {
         this.startTime = null;
         this.interval = null;
-        this.settings.inspectionInterval = null;
-        this.settings.inspectionTime = 15;
+        this.inspectionInterval = null;
+        this.inspectionTime = 15;
         this.currentScramble = '';
         this.solves = JSON.parse(localStorage.getItem('recentSolves') || '[]');
         this.isRunning = false;
@@ -47,7 +47,7 @@ class CubingTimer {
     
     initializeElements() {
         this.timerElement = document.getElementById('timer');
-        this.settings.inspectionElement = document.getElementById('inspectionTimer');
+        this.inspectionElement = document.getElementById('inspectionTimer');
         this.scrambleElement = document.getElementById('scrambleDisplay');
         this.newScrambleBtn = document.getElementById('newScrambleBtn');
         this.resetBtn = document.getElementById('resetBtn');

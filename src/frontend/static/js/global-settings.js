@@ -54,14 +54,20 @@ class GlobalSettings {
     
     applyDarkMode() {
         console.log('Applying dark mode:', this.settings.darkMode);
+        console.log('Current body classes before:', document.body.className);
+        
         if (this.settings.darkMode) {
             document.body.classList.add('dark-mode');
             document.documentElement.setAttribute('data-theme', 'dark');
+            console.log('Dark mode ENABLED - added dark-mode class');
         } else {
             document.body.classList.remove('dark-mode');
             document.documentElement.setAttribute('data-theme', 'light');
+            console.log('Dark mode DISABLED - removed dark-mode class');
         }
-        console.log('Dark mode classes:', document.body.className);
+        
+        console.log('Current body classes after:', document.body.className);
+        console.log('Document theme attribute:', document.documentElement.getAttribute('data-theme'));
     }
     
     applyLargeTimer() {
