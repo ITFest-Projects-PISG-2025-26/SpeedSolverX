@@ -7,31 +7,23 @@ def solve(cube_string):
         if not cube_string or len(cube_string) != 54:
             return "Invalid cube string. Must be 54 characters representing the cube state."
         
-        # Validate cube has exactly 9 of each color
-        valid_colors = {'U', 'D', 'L', 'R', 'F', 'B', 'W', 'Y', 'O', 'R', 'G', 'B'}
-        color_count = {}
+        # For Kociemba, we only need to check if it's a valid cube string
+        # The algorithm will validate the cube configuration internally
+        print(f"Received cube string: {cube_string}")
+        print(f"Length: {len(cube_string)}")
         
-        for color in cube_string:
-            if color not in valid_colors:
-                return f"Invalid color '{color}' found in cube string."
-            color_count[color] = color_count.get(color, 0) + 1
-        
-        # Check if we have exactly 9 of each of 6 colors
-        if len(color_count) != 6:
-            return f"Invalid cube: Found {len(color_count)} colors, expected 6."
-        
-        for color, count in color_count.items():
-            if count != 9:
-                return f"Invalid cube: Color '{color}' appears {count} times, expected 9."
-        
-        # Try to solve with Kociemba
+        # Try to solve with Kociemba directly - it handles validation
         solution = kociemba.solve(cube_string)
+        print(f"Solution: {solution}")
         return solution if solution else "No solution found"
         
     except ValueError as e:
+        print(f"ValueError: {e}")
         return f"Invalid cube configuration: {e}"
     except Exception as e:
-        return f"Solver error: {e}"
+        print(f"Exception: {e}")
+        # Return a more user-friendly error
+        return "Unable to solve cube. Please check that all colors are placed correctly and the cube is solvable."
 
 def generate_scramble():
     """Generate a random scramble sequence"""

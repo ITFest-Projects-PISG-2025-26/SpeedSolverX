@@ -8,18 +8,18 @@ class CubeSolver {
             red: Array(9).fill('red'),      // Right face (R)
             green: Array(9).fill('green'),  // Back face (B)
             orange: Array(9).fill('orange'), // Left face (L)
-            white: Array(9).fill('white'),   // Top face (U)
-            yellow: Array(9).fill('yellow') // Bottom face (D)
+            yellow: Array(9).fill('yellow'), // Top face (U) - Now yellow
+            white: Array(9).fill('white')   // Bottom face (D) - Now white
         };
         
-        this.faceOrder = ['blue', 'red', 'green', 'orange', 'white', 'yellow'];
+        this.faceOrder = ['blue', 'red', 'green', 'orange', 'yellow', 'white'];
         this.faceNames = {
             blue: 'Blue Face (Front)',
             red: 'Red Face (Right)',
             green: 'Green Face (Back)',
             orange: 'Orange Face (Left)',
-            white: 'White Face (Top)',
-            yellow: 'Yellow Face (Bottom)'
+            yellow: 'Yellow Face (Top)',
+            white: 'White Face (Bottom)'
         };
         
         this.colorMap = {
@@ -277,10 +277,10 @@ class CubeSolver {
         // Kociemba expects: UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB
         // Order: Up(U), Right(R), Front(F), Down(D), Left(L), Back(B)
         const faceMapping = {
-            white: 'U',   // Up (white face)
+            yellow: 'U',  // Up (yellow face - top)
             red: 'R',     // Right (red face) 
             blue: 'F',    // Front (blue face)
-            yellow: 'D',  // Down (yellow face)
+            white: 'D',   // Down (white face - bottom)
             orange: 'L',  // Left (orange face)
             green: 'B'    // Back (green face)
         };
@@ -288,7 +288,8 @@ class CubeSolver {
         let cubeString = '';
         
         // Add faces in URFDLB order (Kociemba standard)
-        const solverOrder = ['white', 'red', 'blue', 'yellow', 'orange', 'green'];
+        // Changed order: yellow=U, red=R, blue=F, white=D, orange=L, green=B
+        const solverOrder = ['yellow', 'red', 'blue', 'white', 'orange', 'green'];
         
         solverOrder.forEach(face => {
             this.cubeState[face].forEach(color => {
@@ -296,23 +297,8 @@ class CubeSolver {
             });
         });
         
-        // Validate the cube string before returning
-        const colorCounts = {};
-        for (let char of cubeString) {
-            colorCounts[char] = (colorCounts[char] || 0) + 1;
-        }
-        
         console.log('Generated cube string:', cubeString);
-        console.log('Color counts:', colorCounts);
         console.log('Cube state:', this.cubeState);
-        
-        // Check if we have exactly 9 of each color
-        const expectedColors = ['U', 'R', 'F', 'D', 'L', 'B'];
-        for (let color of expectedColors) {
-            if (colorCounts[color] !== 9) {
-                console.warn(`Warning: Color ${color} appears ${colorCounts[color]} times instead of 9`);
-            }
-        }
         
         return cubeString;
     }
@@ -351,14 +337,14 @@ class CubeSolver {
     }
 
     resetSolver() {
-        // Reset cube state
+        // Reset cube state with new orientation
         this.cubeState = {
             blue: Array(9).fill('blue'),
             red: Array(9).fill('red'),
             green: Array(9).fill('green'),
             orange: Array(9).fill('orange'),
-            white: Array(9).fill('white'),
-            yellow: Array(9).fill('yellow')
+            yellow: Array(9).fill('yellow'), // Top face - yellow
+            white: Array(9).fill('white')    // Bottom face - white
         };
         
         this.currentFaceIndex = 0;
