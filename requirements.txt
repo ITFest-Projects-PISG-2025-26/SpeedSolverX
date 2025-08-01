@@ -2,3 +2,6 @@ flask
 flask-login
 werkzeug
 kociemba
+pymongo
+bcrypt
+python-dotenv
