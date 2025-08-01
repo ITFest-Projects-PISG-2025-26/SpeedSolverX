@@ -66,6 +66,12 @@ def settings():
 def get_scramble():
     return jsonify({'scramble': generate_scramble()})
 
+@app.route('/api/scrambled-cube')
+@login_required
+def get_scrambled_cube():
+    from solver import generate_scrambled_cube
+    return jsonify(generate_scrambled_cube())
+
 @app.route('/solve', methods=['POST'])
 @login_required
 def solve_cube():

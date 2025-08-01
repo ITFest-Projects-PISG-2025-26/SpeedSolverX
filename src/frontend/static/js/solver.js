@@ -59,8 +59,17 @@ class CubeSolver {
         document.getElementById('nextFaceBtn').addEventListener('click', () => this.nextFace());
 
         // Control buttons
+        document.getElementById('loadScrambleBtn').addEventListener('click', () => this.loadValidScramble());
         document.getElementById('resetFaceBtn').addEventListener('click', () => this.resetCurrentFace());
         document.getElementById('solveCubeBtn').addEventListener('click', () => this.solveCube());
+
+        // Add debug button for testing
+        const debugBtn = document.createElement('button');
+        debugBtn.innerHTML = '<i class="fas fa-bug"></i> Test Solved Cube';
+        debugBtn.className = 'btn btn-info';
+        debugBtn.style.marginLeft = '10px';
+        debugBtn.addEventListener('click', () => this.testSolvedCube());
+        document.getElementById('solveCubeBtn').parentNode.appendChild(debugBtn);
 
         // Camera controls
         document.getElementById('startCameraBtn').addEventListener('click', () => this.startCamera());
@@ -229,6 +238,75 @@ class CubeSolver {
             resetBtn.classList.remove('btn-success');
             resetBtn.innerHTML = '<i class="fas fa-undo"></i> Reset Face';
         }, 1000);
+    }
+
+    async loadValidScramble() {
+        try {
+            const loadBtn = document.getElementById('loadScrambleBtn');
+            const originalText = loadBtn.innerHTML;
+            loadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+            loadBtn.disabled = true;
+
+            const response = await fetch('/api/scrambled-cube');
+            if (response.ok) {
+                const data = await response.json();
+                
+                // Parse the cube state string and load it into our cube
+                this.loadCubeFromString(data.state);
+                
+                // Show success message
+                loadBtn.classList.add('btn-success');
+                loadBtn.innerHTML = '<i class="fas fa-check"></i> Scramble Loaded!';
+                
+                // Update interface
+                this.currentFaceIndex = 0;
+                this.updateFaceDisplay();
+                this.updateProgressIndicator();
+                
+                setTimeout(() => {
+                    loadBtn.classList.remove('btn-success');
+                    loadBtn.innerHTML = originalText;
+                    loadBtn.disabled = false;
+                }, 2000);
+                
+            } else {
+                throw new Error('Failed to load scramble');
+            }
+        } catch (error) {
+            console.error('Error loading scramble:', error);
+            const loadBtn = document.getElementById('loadScrambleBtn');
+            loadBtn.innerHTML = '<i class="fas fa-exclamation"></i> Error';
+            setTimeout(() => {
+                loadBtn.innerHTML = '<i class="fas fa-random"></i> Load Valid Scramble';
+                loadBtn.disabled = false;
+            }, 2000);
+        }
+    }
+
+    loadCubeFromString(cubeString) {
+        // Convert URFDLB string back to our cube state
+        // U=yellow, R=red, F=blue, D=white, L=orange, B=green
+        const stringToColor = {
+            'U': 'yellow',
+            'R': 'red', 
+            'F': 'blue',
+            'D': 'white',
+            'L': 'orange',
+            'B': 'green'
+        };
+        
+        // Parse each face (9 characters each)
+        const faces = ['yellow', 'red', 'blue', 'white', 'orange', 'green'];
+        
+        for (let faceIndex = 0; faceIndex < 6; faceIndex++) {
+            const face = faces[faceIndex];
+            const startIndex = faceIndex * 9;
+            
+            for (let squareIndex = 0; squareIndex < 9; squareIndex++) {
+                const char = cubeString[startIndex + squareIndex];
+                this.cubeState[face][squareIndex] = stringToColor[char];
+            }
+        }
     }
 
     async solveCube() {
