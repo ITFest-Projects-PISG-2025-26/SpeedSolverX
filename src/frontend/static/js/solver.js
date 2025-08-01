@@ -274,19 +274,20 @@ class CubeSolver {
 
     convertCubeStateToString() {
         // Convert cube state to string format expected by solver
-        // Order: Up, Right, Front, Down, Left, Back (URFDLB)
+        // Kociemba expects: UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB
+        // Order: Up(U), Right(R), Front(F), Down(D), Left(L), Back(B)
         const faceMapping = {
-            white: 'W',   // Up
-            red: 'R',     // Right
-            blue: 'F',    // Front
-            yellow: 'D',  // Down
-            orange: 'L',  // Left
-            green: 'B'    // Back
+            white: 'U',   // Up (white face)
+            red: 'R',     // Right (red face) 
+            blue: 'F',    // Front (blue face)
+            yellow: 'D',  // Down (yellow face)
+            orange: 'L',  // Left (orange face)
+            green: 'B'    // Back (green face)
         };
         
         let cubeString = '';
         
-        // Add faces in URFDLB order
+        // Add faces in URFDLB order (Kociemba standard)
         const solverOrder = ['white', 'red', 'blue', 'yellow', 'orange', 'green'];
         
         solverOrder.forEach(face => {
@@ -295,8 +296,23 @@ class CubeSolver {
             });
         });
         
+        // Validate the cube string before returning
+        const colorCounts = {};
+        for (let char of cubeString) {
+            colorCounts[char] = (colorCounts[char] || 0) + 1;
+        }
+        
         console.log('Generated cube string:', cubeString);
+        console.log('Color counts:', colorCounts);
         console.log('Cube state:', this.cubeState);
+        
+        // Check if we have exactly 9 of each color
+        const expectedColors = ['U', 'R', 'F', 'D', 'L', 'B'];
+        for (let color of expectedColors) {
+            if (colorCounts[color] !== 9) {
+                console.warn(`Warning: Color ${color} appears ${colorCounts[color]} times instead of 9`);
+            }
+        }
         
         return cubeString;
     }
