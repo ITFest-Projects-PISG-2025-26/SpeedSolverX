@@ -1,25 +1,33 @@
 class SettingsManager {
     constructor() {
+        console.log('SettingsManager constructor called');
+        this.initialized = false;
         // Wait for global settings to be ready
-        if (window.globalSettings) {
-            this.init();
-        } else {
-            document.addEventListener('DOMContentLoaded', () => {
-                // Give time for global settings to load
-                const checkGlobalSettings = () => {
-                    if (window.globalSettings) {
-                        this.init();
-                    } else {
-                        setTimeout(checkGlobalSettings, 50);
-                    }
-                };
-                checkGlobalSettings();
-            });
-        }
+        this.waitForGlobalSettings();
+    }
+    
+    waitForGlobalSettings() {
+        console.log('Waiting for global settings...');
+        const checkGlobalSettings = () => {
+            if (window.globalSettings) {
+                console.log('Global settings found, initializing...');
+                this.init();
+            } else {
+                console.log('Global settings not ready, retrying in 50ms');
+                setTimeout(checkGlobalSettings, 50);
+            }
+        };
+        checkGlobalSettings();
     }
     
     init() {
+        if (this.initialized) {
+            console.log('SettingsManager already initialized, skipping');
+            return;
+        }
+        
         try {
+            console.log('Starting SettingsManager initialization...');
             this.globalSettings = window.globalSettings;
             this.settings = this.globalSettings.getAllSettings();
             console.log('Settings Manager initialized with settings:', this.settings);
@@ -28,6 +36,9 @@ class SettingsManager {
             this.syncUIWithSettings(); // Read current UI state first
             this.bindEvents();
             this.applySettings();
+            
+            this.initialized = true;
+            console.log('SettingsManager initialization complete');
             
             // Listen for settings changes from other sources
             window.addEventListener('settingsChanged', (e) => {
@@ -497,7 +508,13 @@ class SettingsManager {
     }
 }
 
-// Initialize settings manager
-document.addEventListener('DOMContentLoaded', () => {
+// Initialize settings manager when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('DOM loaded, creating SettingsManager');
+        window.settingsManager = new SettingsManager();
+    });
+} else {
+    console.log('DOM already loaded, creating SettingsManager immediately');
     window.settingsManager = new SettingsManager();
-});
+}

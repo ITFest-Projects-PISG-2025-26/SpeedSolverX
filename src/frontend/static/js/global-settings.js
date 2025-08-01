@@ -97,14 +97,23 @@ class GlobalSettings {
     }
     
     updateSetting(key, value) {
+        console.log(`GlobalSettings.updateSetting called: ${key} = ${value}`);
+        console.log('Previous settings:', this.settings);
+        
         this.settings[key] = value;
         localStorage.setItem('speedsolverx_settings', JSON.stringify(this.settings));
+        
+        console.log('Updated settings:', this.settings);
+        console.log('Saved to localStorage:', localStorage.getItem('speedsolverx_settings'));
+        
         this.applyGlobalSettings();
         
         // Notify other pages of settings change
         window.dispatchEvent(new CustomEvent('settingsChanged', {
             detail: { key, value, allSettings: this.settings }
         }));
+        
+        console.log('Settings change event dispatched');
     }
     
     // Method to force refresh settings (useful when switching pages)
