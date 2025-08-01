@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Settings - SpeedSolverX</title>
-    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="/static/css/styles.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
@@ -15,7 +15,7 @@
             </a>
             <div class="nav-user">
                 <span>Welcome, {{ current_user.id }}!</span>
-                <a href="/timer" class="nav-link"><i class="fas fa-stopwatch"></i> Timer</a>
+                <a href="/" class="nav-link"><i class="fas fa-stopwatch"></i> Timer</a>
                 <a href="/solver" class="nav-link"><i class="fas fa-magic"></i> Solver</a>
                 <a href="/stats" class="nav-link"><i class="fas fa-chart-line"></i> Stats</a>
                 <a href="/logout" class="nav-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
@@ -236,6 +236,6 @@
         </div>
     </div>
 
-    <script src="/static/settings.js"></script>
+    <script src="/static/js/settings.js"></script>
 </body>
 </html>

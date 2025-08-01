@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Statistics - SpeedSolverX</title>
-    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="/static/css/styles.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
@@ -15,7 +15,7 @@
             </a>
             <div class="nav-user">
                 <span>Welcome, {{ current_user.id }}!</span>
-                <a href="/timer" class="nav-link"><i class="fas fa-stopwatch"></i> Timer</a>
+                <a href="/" class="nav-link"><i class="fas fa-stopwatch"></i> Timer</a>
                 <a href="/solver" class="nav-link"><i class="fas fa-magic"></i> Solver</a>
                 <a href="/settings" class="nav-link"><i class="fas fa-cog"></i> Settings</a>
                 <a href="/logout" class="nav-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
@@ -158,7 +158,7 @@
     </div>
 
     <script id="solves-data" type="application/json">{{ solves | tojson | safe }}</script>
-    <script src="/static/stats.js"></script>
+    <script src="/static/js/stats.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             try {

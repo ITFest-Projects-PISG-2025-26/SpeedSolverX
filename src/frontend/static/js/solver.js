@@ -8,7 +8,7 @@ class CubeSolver {
             red: Array(9).fill('red'),      // Right face (R)
             green: Array(9).fill('green'),  // Back face (B)
             orange: Array(9).fill('orange'), // Left face (L)
-            white: Array(9).fill('white'),  // Top face (U)
+            white: Array(9).fill('white'),   // Top face (U)
             yellow: Array(9).fill('yellow') // Bottom face (D)
         };
         

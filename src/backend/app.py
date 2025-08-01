@@ -11,7 +11,7 @@ import statistics
 # Load environment variables
 load_dotenv()
 
-app = Flask(__name__, template_folder='../frontend', static_folder='../frontend/static')
+app = Flask(__name__, template_folder='../frontend/templates', static_folder='../frontend/static')
 app.secret_key = os.environ.get('JWT_SECRET', 'default-secret-key')
 
 # Initialize Flask-Login
