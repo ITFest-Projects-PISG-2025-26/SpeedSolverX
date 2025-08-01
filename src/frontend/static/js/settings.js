@@ -180,36 +180,46 @@ class SettingsManager {
             // Button events
             if (this.elements.exportDataBtn) {
                 console.log('Binding export data button');
-                this.elements.exportDataBtn.addEventListener('click', () => {
+                this.elements.exportDataBtn.addEventListener('click', (e) => {
                     console.log('Export data button clicked');
+                    e.preventDefault();
+                    this.addButtonClickFeedback(e.target);
                     this.exportData();
                 });
             }
             if (this.elements.importDataBtn) {
                 console.log('Binding import data button');
-                this.elements.importDataBtn.addEventListener('click', () => {
+                this.elements.importDataBtn.addEventListener('click', (e) => {
                     console.log('Import data button clicked');
+                    e.preventDefault();
+                    this.addButtonClickFeedback(e.target);
                     this.importData();
                 });
             }
             if (this.elements.clearStatsBtn) {
                 console.log('Binding clear stats button');
-                this.elements.clearStatsBtn.addEventListener('click', () => {
+                this.elements.clearStatsBtn.addEventListener('click', (e) => {
                     console.log('Clear stats button clicked');
+                    e.preventDefault();
+                    this.addButtonClickFeedback(e.target);
                     this.clearStats();
                 });
             }
             if (this.elements.resetSettingsBtn) {
                 console.log('Binding reset settings button');
-                this.elements.resetSettingsBtn.addEventListener('click', () => {
+                this.elements.resetSettingsBtn.addEventListener('click', (e) => {
                     console.log('Reset settings button clicked');
+                    e.preventDefault();
+                    this.addButtonClickFeedback(e.target);
                     this.resetSettings();
                 });
             }
             if (this.elements.saveSettingsBtn) {
                 console.log('Binding save settings button');
-                this.elements.saveSettingsBtn.addEventListener('click', () => {
+                this.elements.saveSettingsBtn.addEventListener('click', (e) => {
                     console.log('Save settings button clicked');
+                    e.preventDefault();
+                    this.addButtonClickFeedback(e.target);
                     this.saveSettings();
                 });
             }
@@ -392,86 +402,164 @@ class SettingsManager {
     }
     
     exportData() {
-        const data = {
-            settings: this.settings,
-            solves: JSON.parse(localStorage.getItem('recentSolves') || '[]'),
-            exportDate: new Date().toISOString(),
-            version: '1.0'
-        };
-        
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `speedsolverx_data_${new Date().toISOString().split('T')[0]}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
-        
-        this.showNotification('Data exported successfully!', 'success');
+        try {
+            console.log('Starting data export...');
+            const data = {
+                settings: this.settings,
+                solves: JSON.parse(localStorage.getItem('recentSolves') || '[]'),
+                exportDate: new Date().toISOString(),
+                version: '1.0'
+            };
+            
+            console.log('Data to export:', data);
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `speedsolverx_data_${new Date().toISOString().split('T')[0]}.json`;
+            
+            // Add visual feedback
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            this.showNotification('Data exported successfully!', 'success');
+            console.log('Data export completed successfully');
+        } catch (error) {
+            console.error('Export error:', error);
+            this.showNotification('Failed to export data. Please try again.', 'error');
+        }
     }
     
     importData() {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = '.json';
-        
-        input.onchange = (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
+        try {
+            console.log('Starting data import...');
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.style.display = 'none';
             
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    
-                    if (data.settings) {
-                        // Update each setting through the global settings manager
-                        Object.keys(data.settings).forEach(key => {
-                            if (this.globalSettings.defaultSettings.hasOwnProperty(key)) {
-                                this.globalSettings.updateSetting(key, data.settings[key]);
-                            }
-                        });
-                        this.settings = this.globalSettings.getAllSettings();
-                        this.updateUIFromSettings();
-                    }
-                    
-                    if (data.solves) {
-                        localStorage.setItem('recentSolves', JSON.stringify(data.solves));
-                    }
-                    
-                    this.showNotification('Data imported successfully!', 'success');
-                } catch (error) {
-                    console.error('Import error:', error);
-                    this.showNotification('Failed to import data. Invalid file format.', 'error');
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                if (!file) {
+                    console.log('No file selected');
+                    return;
                 }
+                
+                console.log('File selected:', file.name);
+                this.showNotification('Processing import file...', 'info');
+                
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        console.log('Reading file contents...');
+                        const data = JSON.parse(e.target.result);
+                        console.log('Parsed import data:', data);
+                        
+                        let importedSettings = false;
+                        let importedSolves = false;
+                        
+                        if (data.settings) {
+                            console.log('Importing settings...');
+                            // Update each setting through the global settings manager
+                            Object.keys(data.settings).forEach(key => {
+                                if (this.globalSettings.defaultSettings.hasOwnProperty(key)) {
+                                    this.globalSettings.updateSetting(key, data.settings[key]);
+                                }
+                            });
+                            this.settings = this.globalSettings.getAllSettings();
+                            this.updateUIFromSettings();
+                            importedSettings = true;
+                        }
+                        
+                        if (data.solves && Array.isArray(data.solves)) {
+                            console.log(`Importing ${data.solves.length} solves...`);
+                            localStorage.setItem('recentSolves', JSON.stringify(data.solves));
+                            importedSolves = true;
+                        }
+                        
+                        const message = `Data imported successfully! ${importedSettings ? 'Settings' : ''}${importedSettings && importedSolves ? ' and ' : ''}${importedSolves ? `${data.solves.length} solves` : ''} imported.`;
+                        this.showNotification(message, 'success');
+                        console.log('Import completed successfully');
+                    } catch (error) {
+                        console.error('Import parsing error:', error);
+                        this.showNotification('Failed to import data. Invalid file format or corrupted file.', 'error');
+                    }
+                };
+                
+                reader.onerror = () => {
+                    console.error('File reading error');
+                    this.showNotification('Failed to read file. Please try again.', 'error');
+                };
+                
+                reader.readAsText(file);
             };
-            reader.readAsText(file);
-        };
-        
-        input.click();
+            
+            // Add to DOM and trigger click
+            document.body.appendChild(input);
+            input.click();
+            document.body.removeChild(input);
+            
+        } catch (error) {
+            console.error('Import initialization error:', error);
+            this.showNotification('Failed to initialize import. Please try again.', 'error');
+        }
     }
     
     clearStats() {
+        console.log('Clear stats requested...');
         if (confirm('Are you sure you want to clear all statistics? This action cannot be undone.')) {
-            localStorage.removeItem('recentSolves');
-            this.showNotification('Statistics cleared successfully!', 'success');
-            
-            // Refresh the page if on stats page
-            if (window.location.pathname === '/stats') {
-                window.location.reload();
+            try {
+                const solvesBefore = JSON.parse(localStorage.getItem('recentSolves') || '[]');
+                console.log(`Clearing ${solvesBefore.length} solves...`);
+                
+                localStorage.removeItem('recentSolves');
+                
+                const solvesAfter = JSON.parse(localStorage.getItem('recentSolves') || '[]');
+                console.log(`Solves after clearing: ${solvesAfter.length}`);
+                
+                this.showNotification(`${solvesBefore.length} solve(s) cleared successfully!`, 'success');
+                
+                // Refresh the page if on stats page
+                if (window.location.pathname === '/stats') {
+                    console.log('Refreshing stats page...');
+                    setTimeout(() => window.location.reload(), 1000);
+                }
+            } catch (error) {
+                console.error('Error clearing stats:', error);
+                this.showNotification('Failed to clear statistics. Please try again.', 'error');
             }
+        } else {
+            console.log('Clear stats cancelled by user');
         }
     }
     
     resetSettings() {
+        console.log('Reset settings requested...');
         if (confirm('Are you sure you want to reset all settings to default values?')) {
-            // Reset through global settings
-            Object.keys(this.globalSettings.defaultSettings).forEach(key => {
-                this.globalSettings.updateSetting(key, this.globalSettings.defaultSettings[key]);
-            });
-            this.settings = this.globalSettings.getAllSettings();
-            this.updateUIFromSettings();
-            this.showNotification('Settings reset to defaults!', 'success');
+            try {
+                console.log('Resetting settings to defaults...');
+                console.log('Current settings:', this.settings);
+                console.log('Default settings:', this.globalSettings.defaultSettings);
+                
+                // Reset through global settings
+                Object.keys(this.globalSettings.defaultSettings).forEach(key => {
+                    this.globalSettings.updateSetting(key, this.globalSettings.defaultSettings[key]);
+                });
+                
+                this.settings = this.globalSettings.getAllSettings();
+                this.updateUIFromSettings();
+                
+                console.log('Settings after reset:', this.settings);
+                this.showNotification('Settings reset to defaults successfully!', 'success');
+            } catch (error) {
+                console.error('Error resetting settings:', error);
+                this.showNotification('Failed to reset settings. Please try again.', 'error');
+            }
+        } else {
+            console.log('Reset settings cancelled by user');
         }
     }
     
@@ -549,6 +637,22 @@ class SettingsManager {
         });
         
         console.log(`Notification shown: ${message} (${type})`);
+    }
+    
+    addButtonClickFeedback(button) {
+        // Add visual feedback for button clicks
+        const originalText = button.innerHTML;
+        const originalClass = button.className;
+        
+        // Add clicked state
+        button.style.transform = 'scale(0.95)';
+        button.style.opacity = '0.8';
+        
+        // Reset after short delay
+        setTimeout(() => {
+            button.style.transform = '';
+            button.style.opacity = '';
+        }, 150);
     }
     
     // Public methods for other components
