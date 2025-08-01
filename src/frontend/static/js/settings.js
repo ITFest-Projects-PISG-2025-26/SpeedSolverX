@@ -29,11 +29,14 @@ class SettingsManager {
         try {
             console.log('Starting SettingsManager initialization...');
             this.globalSettings = window.globalSettings;
+            
+            // Force refresh settings from localStorage to ensure we have the latest
+            this.globalSettings.refreshSettings();
             this.settings = this.globalSettings.getAllSettings();
-            console.log('Settings Manager initialized with settings:', this.settings);
+            console.log('Settings Manager initialized with fresh settings:', this.settings);
             
             this.initializeElements();
-            this.syncUIWithSettings(); // Read current UI state first
+            this.syncUIWithSettings(); // Update UI to match saved settings
             this.bindEvents();
             this.applySettings();
             
@@ -68,34 +71,34 @@ class SettingsManager {
     
     syncUIWithSettings() {
         try {
-            // Read current UI state and sync with settings
+            // Update UI to match saved settings (not the other way around)
+            console.log('Syncing UI to match saved settings:', this.settings);
+            
             Object.keys(this.elements).forEach(key => {
                 if (key.includes('Toggle') && this.elements[key]) {
                     const settingKey = key.replace('Toggle', '');
-                    const isChecked = this.elements[key].checked;
-                    // If setting differs from UI, update the setting to match UI
-                    if (this.settings[settingKey] !== isChecked) {
-                        console.log(`Syncing ${settingKey}: ${this.settings[settingKey]} -> ${isChecked}`);
-                        this.settings[settingKey] = isChecked;
-                        this.globalSettings.updateSetting(settingKey, isChecked);
+                    if (this.settings.hasOwnProperty(settingKey)) {
+                        const savedValue = this.settings[settingKey];
+                        if (this.elements[key].checked !== savedValue) {
+                            console.log(`Updating UI: ${settingKey} toggle to ${savedValue}`);
+                            this.elements[key].checked = savedValue;
+                        }
                     }
                 }
             });
             
-            // Sync input values
-            if (this.elements.scrambleLengthInput) {
-                const value = parseInt(this.elements.scrambleLengthInput.value);
-                if (this.settings.scrambleLength !== value) {
-                    this.settings.scrambleLength = value;
-                    this.globalSettings.updateSetting('scrambleLength', value);
+            // Update input values to match settings
+            if (this.elements.scrambleLengthInput && this.settings.scrambleLength) {
+                if (parseInt(this.elements.scrambleLengthInput.value) !== this.settings.scrambleLength) {
+                    console.log(`Updating UI: scrambleLength input to ${this.settings.scrambleLength}`);
+                    this.elements.scrambleLengthInput.value = this.settings.scrambleLength;
                 }
             }
             
-            if (this.elements.cubeTypeSelect) {
-                const value = this.elements.cubeTypeSelect.value;
-                if (this.settings.cubeType !== value) {
-                    this.settings.cubeType = value;
-                    this.globalSettings.updateSetting('cubeType', value);
+            if (this.elements.cubeTypeSelect && this.settings.cubeType) {
+                if (this.elements.cubeTypeSelect.value !== this.settings.cubeType) {
+                    console.log(`Updating UI: cubeType select to ${this.settings.cubeType}`);
+                    this.elements.cubeTypeSelect.value = this.settings.cubeType;
                 }
             }
             
