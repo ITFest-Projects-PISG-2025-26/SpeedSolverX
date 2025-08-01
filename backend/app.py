@@ -37,6 +37,16 @@ def health():
 def home():
     return render_template('home.html')
 
+@app.route('/timer')
+@login_required
+def timer():
+    return render_template('timer.html')
+
+@app.route('/solver')
+@login_required
+def solver():
+    return render_template('solver.html')
+
 @app.route('/stats')
 @login_required
 def stats():

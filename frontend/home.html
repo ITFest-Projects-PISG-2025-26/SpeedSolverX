@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SpeedSolverX - Cubing Timer</title>
+    <title>Home - SpeedSolverX</title>
     <link rel="stylesheet" href="/static/styles.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -13,6 +13,8 @@
             <h1 class="nav-title">SpeedSolverX</h1>
             <div class="nav-user">
                 <span>Welcome, {{ current_user.id }}!</span>
+                <a href="/timer" class="nav-link"><i class="fas fa-stopwatch"></i> Timer</a>
+                <a href="/solver" class="nav-link"><i class="fas fa-magic"></i> Solver</a>
                 <a href="/stats" class="nav-link"><i class="fas fa-chart-line"></i> Stats</a>
                 <a href="/settings" class="nav-link"><i class="fas fa-cog"></i> Settings</a>
                 <a href="/logout" class="nav-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
@@ -21,68 +23,139 @@
     </nav>
 
     <div class="container">
-        <!-- Scramble Section -->
-        <div class="scramble-section">
-            <div class="scramble-header">
-                <h3>Scramble</h3>
-                <button id="newScrambleBtn" class="btn btn-secondary">
-                    <i class="fas fa-redo"></i> New Scramble
-                </button>
-            </div>
-            <div id="scrambleDisplay" class="scramble-display">
-                Click "New Scramble" to generate a scramble
-            </div>
-        </div>
-
-        <!-- Timer Section -->
-        <div class="timer-section">
-            <div id="inspectionTimer" class="inspection-timer hidden">15</div>
-            <div id="timer" class="timer">0.00</div>
-            <div class="timer-controls">
-                <button id="resetBtn" class="btn btn-secondary">
-                    <i class="fas fa-undo"></i> Reset
-                </button>
-            </div>
-            <div class="timer-instructions">
-                <p>Press SPACEBAR to start/stop the timer</p>
-                <p>Hold SPACEBAR to reset</p>
-            </div>
-        </div>
-
-        <!-- Solve Input Section -->
-        <div class="solve-input-section">
-            <div class="solve-actions">
-                <button id="plus2Btn" class="btn btn-warning">+2</button>
-                <button id="dnfBtn" class="btn btn-danger">DNF</button>
-                <button id="deleteBtn" class="btn btn-secondary">Delete</button>
-            </div>
-        </div>
-
-        <!-- Recent Solves -->
-        <div class="recent-solves">
-            <h3>Recent Solves</h3>
-            <div id="solvesList" class="solves-list">
-                <!-- Solves will be populated by JavaScript -->
-            </div>
-        </div>
-
-        <!-- Cube Solver Section -->
-        <div class="solver-section">
-            <h3>Cube Solver</h3>
-            <form method="POST" action="/solve" class="solver-form">
-                <input name="cube" placeholder="Enter cube state (54 characters)" required class="cube-input">
-                <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-magic"></i> Solve
-                </button>
-            </form>
-            {% if solution %}
-                <div class="solution-display">
-                    <strong>Solution:</strong> {{ solution }}
+        <!-- Welcome Section -->
+        <div class="welcome-section">
+            <div class="welcome-card">
+                <div class="welcome-header">
+                    <i class="fas fa-cube welcome-icon"></i>
+                    <h2>Welcome to SpeedSolverX</h2>
+                    <p>Your ultimate speedcubing companion</p>
                 </div>
-            {% endif %}
+                
+                <div class="features-showcase">
+                    <div class="feature-card" onclick="window.location.href='/timer'">
+                        <div class="feature-icon">
+                            <i class="fas fa-stopwatch"></i>
+                        </div>
+                        <h3>Professional Timer</h3>
+                        <p>Practice with a competition-grade timer featuring inspection, statistics, and customizable settings.</p>
+                        <div class="feature-stats">
+                            <span><i class="fas fa-eye"></i> 15s Inspection</span>
+                            <span><i class="fas fa-chart-bar"></i> Detailed Stats</span>
+                            <span><i class="fas fa-random"></i> Auto Scrambles</span>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-card" onclick="window.location.href='/solver'">
+                        <div class="feature-icon">
+                            <i class="fas fa-magic"></i>
+                        </div>
+                        <h3>Cube Solver</h3>
+                        <p>Solve any scrambled cube with our advanced solving algorithm. Input your cube state and get the solution.</p>
+                        <div class="feature-stats">
+                            <span><i class="fas fa-palette"></i> Visual Input</span>
+                            <span><i class="fas fa-camera"></i> Camera Mode</span>
+                            <span><i class="fas fa-bolt"></i> Instant Solution</span>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-card" onclick="window.location.href='/stats'">
+                        <div class="feature-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h3>Statistics & Analysis</h3>
+                        <p>Track your progress with comprehensive statistics including all standard averages.</p>
+                        <div class="feature-stats">
+                            <span><i class="fas fa-trophy"></i> Personal Bests</span>
+                            <span><i class="fas fa-target"></i> Target Times</span>
+                            <span><i class="fas fa-history"></i> Solve History</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats Overview -->
+        <div class="quick-stats-section">
+            <h3><i class="fas fa-tachometer-alt"></i> Your Quick Stats</h3>
+            <div class="quick-stats-grid">
+                <div class="quick-stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-list-ol"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-number" id="totalSolves">0</span>
+                        <span class="stat-label">Total Solves</span>
+                    </div>
+                </div>
+                
+                <div class="quick-stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-medal"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-number" id="bestSingle">N/A</span>
+                        <span class="stat-label">Best Single</span>
+                    </div>
+                </div>
+                
+                <div class="quick-stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-number" id="currentAo5">N/A</span>
+                        <span class="stat-label">Current Ao5</span>
+                    </div>
+                </div>
+                
+                <div class="quick-stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-calendar-day"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-number" id="todaySolves">0</span>
+                        <span class="stat-label">Today's Solves</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="recent-activity-section">
+            <h3><i class="fas fa-clock"></i> Recent Activity</h3>
+            <div class="activity-list" id="recentActivity">
+                <div class="no-activity">
+                    <i class="fas fa-info-circle"></i>
+                    <p>No recent activity. Start timing to see your solves here!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions-section">
+            <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
+            <div class="quick-actions-grid">
+                <a href="/timer" class="quick-action-btn primary">
+                    <i class="fas fa-play"></i>
+                    Start Timing
+                </a>
+                <a href="/solver" class="quick-action-btn secondary">
+                    <i class="fas fa-magic"></i>
+                    Solve Cube
+                </a>
+                <a href="/stats" class="quick-action-btn info">
+                    <i class="fas fa-chart-line"></i>
+                    View Stats
+                </a>
+                <a href="/settings" class="quick-action-btn warning">
+                    <i class="fas fa-cog"></i>
+                    Settings
+                </a>
+            </div>
         </div>
     </div>
 
-    <script src="/static/timer.js"></script>
+    <script src="/static/home.js"></script>
 </body>
 </html>

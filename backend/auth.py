@@ -28,8 +28,7 @@ def signup():
         username = request.form['username']
         password = generate_password_hash(request.form['password'])
         users_db[username] = {'password': password}
-        login_user(User(username))
-        return redirect(url_for('home'))
+        return redirect(url_for('auth.login'))
     return render_template('signup.html')
 
 @auth_bp.route('/logout')
