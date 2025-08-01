@@ -11,36 +11,19 @@ class CubingTimer {
         this.keyPressed = false;
         this.holdTimer = null;
         
-        // Settings integration
-        this.settings = {
-            inspection: false,
-            autoScramble: true,
-            sound: false,
-            holdToStart: true,
-            scrambleLength: 20,
-            cubeType: '3x3'
-        };
+        // Default configuration (no longer configurable)
+        this.inspection = false;
+        this.autoScramble = true;
+        this.sound = false;
+        this.holdToStart = true;
+        this.scrambleLength = 20;
+        this.cubeType = '3x3';
+        this.hideScramble = false;
+        this.milliseconds = false;
         
-        this.loadSettings();
         this.initializeElements();
         this.bindEvents();
         this.loadRecentSolves();
-    }
-    
-    loadSettings() {
-        if (window.settingsManager) {
-            this.settings = window.settingsManager.getAllSettings();
-        } else {
-            // Fallback to localStorage
-            const saved = localStorage.getItem('speedsolverx_settings');
-            if (saved) {
-                try {
-                    this.settings = { ...this.settings, ...JSON.parse(saved) };
-                } catch (e) {
-                    console.error('Failed to load settings:', e);
-                }
-            }
-        }
     }
     
     initializeElements() {
@@ -82,9 +65,9 @@ class CubingTimer {
                 this.startMainTimer();
             } else {
                 // Start hold timer for reset/start
-                if (this.settings.holdToStart) {
+                if (this.holdToStart) {
                     this.holdTimer = setTimeout(() => {
-                        if (this.settings.inspection) {
+                        if (this.inspection) {
                             this.startInspection();
                         } else {
                             this.startMainTimer();
@@ -93,7 +76,7 @@ class CubingTimer {
                     
                     this.timerElement.style.color = '#f39c12';
                 } else {
-                    if (this.settings.inspection) {
+                    if (this.inspection) {
                         this.startInspection();
                     } else {
                         this.startMainTimer();
@@ -126,7 +109,7 @@ class CubingTimer {
         this.inspectionElement.textContent = this.inspectionTime;
         this.timerElement.classList.add('inspection');
         
-        if (this.settings.hideScramble) {
+        if (this.hideScramble) {
             this.scrambleElement.style.opacity = '0.3';
         }
         
@@ -148,13 +131,13 @@ class CubingTimer {
                 this.currentPenalty = 'dnf';
                 this.timerElement.classList.add('dnf');
                 
-                if (this.settings.sound) {
+                if (this.sound) {
                     this.playSound('error');
                 }
             } else if (this.inspectionTime <= 3) {
                 // Warning for last 3 seconds
                 this.inspectionElement.style.color = '#e74c3c';
-                if (this.settings.sound) {
+                if (this.sound) {
                     this.playSound('warning');
                 }
             }
@@ -168,7 +151,7 @@ class CubingTimer {
             this.isInspecting = false;
             this.timerElement.classList.remove('inspection');
             
-            if (this.settings.hideScramble) {
+            if (this.hideScramble) {
                 this.scrambleElement.style.opacity = '0.1';
             }
         }
@@ -177,13 +160,13 @@ class CubingTimer {
         this.startTime = Date.now();
         this.timerElement.classList.add('running');
         
-        if (this.settings.sound) {
+        if (this.sound) {
             this.playSound('start');
         }
         
         this.interval = setInterval(() => {
             const elapsed = (Date.now() - this.startTime) / 1000;
-            const precision = this.settings.milliseconds ? 3 : 2;
+            const precision = this.milliseconds ? 3 : 2;
             this.timerElement.textContent = elapsed.toFixed(precision);
         }, 10);
     }
@@ -197,23 +180,23 @@ class CubingTimer {
         const finalTime = (Date.now() - this.startTime) / 1000;
         this.timerElement.classList.remove('running');
         
-        if (this.settings.hideScramble) {
+        if (this.hideScramble) {
             this.scrambleElement.style.opacity = '1';
         }
         
-        if (this.settings.sound) {
+        if (this.sound) {
             this.playSound('stop');
         }
         
         // Apply inspection penalty if applicable
         let penalty = null;
-        if (this.settings.inspection && this.inspectionTime <= 0 && this.inspectionTime > -2) {
+        if (this.inspection && this.inspectionTime <= 0 && this.inspectionTime > -2) {
             penalty = 'plus2';
         }
         
         this.recordSolve(finalTime, penalty);
         
-        if (this.settings.autoScramble) {
+        if (this.autoScramble) {
             this.generateNewScramble();
         }
     }
@@ -255,7 +238,7 @@ class CubingTimer {
         const scramble = [];
         let lastMove = null;
         
-        const length = this.settings.scrambleLength || 20;
+        const length = this.scrambleLength || 20;
         
         for (let i = 0; i < length; i++) {
             let move = moves[Math.floor(Math.random() * moves.length)];

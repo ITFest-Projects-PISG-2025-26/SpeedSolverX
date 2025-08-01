@@ -56,11 +56,6 @@ def stats():
     stats_data = calculate_stats(solves)
     return render_template('stats.html', stats=stats_data, solves=solves)
 
-@app.route('/settings')
-@login_required
-def settings():
-    return render_template('settings.html')
-
 @app.route('/api/scramble')
 @login_required
 def get_scramble():
