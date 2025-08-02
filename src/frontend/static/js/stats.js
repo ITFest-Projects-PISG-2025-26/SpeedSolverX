@@ -33,7 +33,7 @@ function initializeStatsPage(solvesData) {
         }
     }
     
-    // Set up event delegation for delete buttons
+    // Set up event delegation for delete buttons and bulk actions
     document.addEventListener('click', function(e) {
         if (e.target.closest('.delete-solve-btn')) {
             const button = e.target.closest('.delete-solve-btn');
@@ -41,9 +41,32 @@ function initializeStatsPage(solvesData) {
             deleteSolve(parseInt(index));
         }
     });
+
+    // Set up bulk action button event listeners
+    const selectAllBtn = document.getElementById('select-all-btn');
+    const deleteSelectedBtn = document.getElementById('delete-selected-btn');
+    const deleteAllBtn = document.getElementById('delete-all-btn');
+
+    if (selectAllBtn) {
+        selectAllBtn.addEventListener('click', selectAllSolves);
+    }
+    if (deleteSelectedBtn) {
+        deleteSelectedBtn.addEventListener('click', deleteSelectedSolves);
+    }
+    if (deleteAllBtn) {
+        deleteAllBtn.addEventListener('click', deleteAllSolves);
+    }
+
+    // Update delete selected button when checkboxes change
+    document.addEventListener('change', function(e) {
+        if (e.target.classList.contains('solve-checkbox')) {
+            updateBulkActionButtons();
+        }
+    });
     
     // Initialize on page load
     calculateTargetProgress();
+    updateBulkActionButtons();
 }
 
 function deleteSolve(index) {
@@ -199,4 +222,91 @@ function initializeTimesChart(solvesData) {
             }
         }
     });
+}
+
+// Bulk action functions
+function selectAllSolves() {
+    const checkboxes = document.querySelectorAll('.solve-checkbox');
+    const selectAllBtn = document.getElementById('select-all-btn');
+    const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+    
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = !allChecked;
+    });
+    
+    selectAllBtn.textContent = allChecked ? 'Select All' : 'Deselect All';
+    updateBulkActionButtons();
+}
+
+function deleteSelectedSolves() {
+    const selectedCheckboxes = document.querySelectorAll('.solve-checkbox:checked');
+    
+    if (selectedCheckboxes.length === 0) {
+        alert('Please select solves to delete.');
+        return;
+    }
+    
+    const selectedIndices = Array.from(selectedCheckboxes).map(cb => 
+        parseInt(cb.getAttribute('data-solve-index'))
+    );
+    
+    if (confirm(`Are you sure you want to delete ${selectedIndices.length} selected solve(s)?`)) {
+        fetch('/api/delete_selected', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ indices: selectedIndices })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Failed to delete selected solves. Please try again.');
+            }
+        })
+        .catch(error => {
+            console.error('Error deleting selected solves:', error);
+            alert('Failed to delete selected solves. Please try again.');
+        });
+    }
+}
+
+function deleteAllSolves() {
+    if (confirm('Are you sure you want to delete ALL solve history? This action cannot be undone.')) {
+        if (confirm('This will permanently delete ALL your solve data. Are you absolutely sure?')) {
+            fetch('/api/delete_all', {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Failed to delete all solves. Please try again.');
+                }
+            })
+            .catch(error => {
+                console.error('Error deleting all solves:', error);
+                alert('Failed to delete all solves. Please try again.');
+            });
+        }
+    }
+}
+
+function updateBulkActionButtons() {
+    const checkboxes = document.querySelectorAll('.solve-checkbox');
+    const selectedCheckboxes = document.querySelectorAll('.solve-checkbox:checked');
+    const selectAllBtn = document.getElementById('select-all-btn');
+    const deleteSelectedBtn = document.getElementById('delete-selected-btn');
+    
+    if (selectAllBtn) {
+        selectAllBtn.textContent = selectedCheckboxes.length === checkboxes.length ? 'Deselect All' : 'Select All';
+    }
+    
+    if (deleteSelectedBtn) {
+        deleteSelectedBtn.disabled = selectedCheckboxes.length === 0;
+        deleteSelectedBtn.textContent = `Delete Selected (${selectedCheckboxes.length})`;
+    }
 }

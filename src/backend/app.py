@@ -1,7 +1,12 @@
 import os
+import sys
 import json
 from flask import Flask, render_template, redirect, url_for, request, jsonify
 from flask_login import LoginManager, login_required, current_user
+
+# Add current directory to path for local imports
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
 from auth import auth_bp, init_login
 from solver import solve, generate_scramble, convert_to_kociemba_format
 from dotenv import load_dotenv
@@ -135,6 +140,48 @@ def delete_solve(index):
         return jsonify({'success': True})
     
     return jsonify({'success': False}), 400
+
+@app.route('/api/delete_selected', methods=['DELETE'])
+@login_required
+def delete_selected_solves():
+    try:
+        data = request.get_json()
+        indices = data.get('indices', [])
+        
+        if not indices:
+            return jsonify({'success': False, 'error': 'No indices provided'}), 400
+        
+        user_id = current_user.id
+        solves = user_solves.get(user_id, [])
+        
+        # Sort indices in descending order to delete from the end first
+        # This prevents index shifting issues
+        indices_sorted = sorted(set(indices), reverse=True)
+        
+        # Validate all indices are within bounds
+        for index in indices_sorted:
+            if index < 0 or index >= len(solves):
+                return jsonify({'success': False, 'error': f'Invalid index: {index}'}), 400
+        
+        # Delete solves
+        for index in indices_sorted:
+            del solves[index]
+        
+        return jsonify({'success': True, 'deleted_count': len(indices_sorted)})
+    
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/delete_all', methods=['DELETE'])
+@login_required
+def delete_all_solves():
+    try:
+        user_id = current_user.id
+        user_solves[user_id] = []
+        return jsonify({'success': True})
+    
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 def calculate_stats(solves):
     if not solves:
