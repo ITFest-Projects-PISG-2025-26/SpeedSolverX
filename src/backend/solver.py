@@ -1,7 +1,10 @@
-import kociemba
+import kociemba  # type: ignore[reportMissingTypeStubs]
 import random
 
-def solve(cube_string):
+from typing import Dict, List
+
+
+def solve(cube_string: str) -> str:
     try:
         # Basic validation
         if not cube_string or len(cube_string) != 54:
@@ -36,7 +39,7 @@ def solve(cube_string):
         print(f"Exception: {e}")
         return "Invalid cube state. Please ensure you're entering a valid scrambled cube configuration. Random color patterns won't work - the cube must follow real Rubik's cube mechanics."
 
-def generate_scramble():
+def generate_scramble() -> str:
     """Generate a random scramble sequence"""
     moves = ['R', 'L', 'U', 'D', 'F', 'B']
     modifiers = ['', "'", '2']
@@ -56,7 +59,7 @@ def generate_scramble():
     
     return ' '.join(scramble)
 
-def convert_to_kociemba_format(cube_state):
+def convert_to_kociemba_format(cube_state: Dict[str, List[str]]) -> str:
     """
     Convert cube state dictionary to kociemba format string.
     

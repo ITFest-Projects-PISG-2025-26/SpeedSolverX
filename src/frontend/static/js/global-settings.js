@@ -6,7 +6,7 @@ class GlobalSettings {
             autoScramble: true,
             sound: true,
             holdToStart: true,
-            darkMode: true,
+            darkMode: false,
             largeTimer: true,
             hideScramble: false,
             realtimeStats: true,
