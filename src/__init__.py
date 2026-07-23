@@ -1,1 +1,1 @@
-# SpeedSolverX Source Package
+# SpeedCubeStudio Source Package

@@ -1,205 +1,205 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Statistics - SpeedSolverX</title>
-    <link rel="stylesheet" href="/static/css/styles.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="/static/js/global-settings.js"></script>
-</head>
-<body>
-    <nav class="navbar">
-        <div class="nav-container">
-            <a href="/" class="nav-title-link">
-                <h1 class="nav-title">SpeedSolverX</h1>
-            </a>
-            <div class="nav-user">
-                <span>Welcome, {{ current_user.id }}!</span>
-                <a href="/timer" class="nav-link"><i class="fas fa-stopwatch"></i> Timer</a>
-                <a href="/solver" class="nav-link"><i class="fas fa-magic"></i> Solver</a>
-                <a href="/stats" class="nav-link"><i class="fas fa-chart-line"></i> Stats</a>
-                <a href="/settings" class="nav-link"><i class="fas fa-cog"></i> Settings</a>
-                <a href="/logout" class="nav-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
-            </div>
-        </div>
-    </nav>
-
-    <div class="container">
-        <div class="stats-header">
-            <h2><i class="fas fa-chart-line"></i> Statistics</h2>
-            <div class="stats-summary">
-                <span>Total Solves: {{ stats.total_solves }}</span>
-            </div>
-        </div>
-
-        <!-- Main Statistics Grid -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-label">Best Single</div>
-                <div class="stat-value best">{{ stats.best_single }}</div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-label">Worst Single</div>
-                <div class="stat-value worst">{{ stats.worst_single }}</div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-label">Session Mean</div>
-                <div class="stat-value">{{ stats.session_mean }}</div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-label">Mean of 3 (Mo3)</div>
-                <div class="stat-value">{{ stats.mo3 }}</div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-label">Average of 5 (Ao5)</div>
-                <div class="stat-value">{{ stats.ao5 }}</div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-label">Average of 12 (Ao12)</div>
-                <div class="stat-value">{{ stats.ao12 }}</div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-label">Average of 50 (Ao50)</div>
-                <div class="stat-value">{{ stats.ao50 }}</div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-label">Average of 100 (Ao100)</div>
-                <div class="stat-value">{{ stats.ao100 }}</div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-label">Average of 1000 (Ao1000)</div>
-                <div class="stat-value">{{ stats.ao1000 }}</div>
-            </div>
-        </div>
-
-        <!-- Target Times Section -->
-        <div class="targets-section">
-            <h3><i class="fas fa-target"></i> Target Times</h3>
-            <div class="targets-grid">
-                <div class="target-card">
-                    <div class="target-label">Sub-10 Progress</div>
-                    <div class="target-progress">
-                        <div class="progress-bar">
-                            <div class="progress-fill sub10" style="width: 0%"></div>
-                        </div>
-                        <span class="progress-text">0%</span>
-                    </div>
-                </div>
-                
-                <div class="target-card">
-                    <div class="target-label">Sub-15 Progress</div>
-                    <div class="target-progress">
-                        <div class="progress-bar">
-                            <div class="progress-fill sub15" style="width: 0%"></div>
-                        </div>
-                        <span class="progress-text">0%</span>
-                    </div>
-                </div>
-                
-                <div class="target-card">
-                    <div class="target-label">Sub-20 Progress</div>
-                    <div class="target-progress">
-                        <div class="progress-bar">
-                            <div class="progress-fill sub20" style="width: 0%"></div>
-                        </div>
-                        <span class="progress-text">0%</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Times Chart Section -->
-        <div class="chart-section">
-            <h3><i class="fas fa-chart-line"></i> Times Progress</h3>
-            <div class="chart-container">
-                <canvas id="timesChart"></canvas>
-            </div>
-        </div>
-
-        <!-- Recent Solves History -->
-        <div class="history-section">
-            <div class="history-header">
-                <h3><i class="fas fa-history"></i> Solve History</h3>
-                <div class="bulk-actions">
-                    <button id="select-all-btn" class="btn btn-secondary btn-sm">
-                        <i class="fas fa-check-square"></i> Select All
-                    </button>
-                    <button id="delete-selected-btn" class="btn btn-warning btn-sm" disabled>
-                        <i class="fas fa-trash"></i> Delete Selected
-                    </button>
-                    <button id="delete-all-btn" class="btn btn-danger btn-sm">
-                        <i class="fas fa-trash-alt"></i> Delete All Solves
-                    </button>
-                </div>
-            </div>
-            <div class="solves-table-container">
-                <table class="solves-table">
-                    <thead>
-                        <tr>
-                            <th>
-                                <input type="checkbox" id="selectAllCheckbox" title="Select/Deselect All">
-                            </th>
-                            <th>#</th>
-                            <th>Time</th>
-                            <th>Scramble</th>
-                            <th>Date</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for solve in solves[-50:] %}
-                        <tr class="solve-row {% if solve.dnf %}dnf{% elif solve.plus2 %}plus2{% endif %}">
-                            <td>
-                                <input type="checkbox" class="solve-checkbox" data-solve-index="{{ loop.index0 }}">
-                            </td>
-                            <td>{{ loop.revindex }}</td>
-                            <td class="solve-time">
-                                {% if solve.dnf %}
-                                    DNF({{ "%.2f"|format(solve.time) }})
-                                {% elif solve.plus2 %}
-                                    {{ "%.2f"|format(solve.time + 2) }}+
-                                {% else %}
-                                    {{ "%.2f"|format(solve.time) }}
-                                {% endif %}
-                            </td>
-                            <td class="scramble-cell">{{ solve.scramble[:30] }}{% if solve.scramble|length > 30 %}...{% endif %}</td>
-                            <td>{{ solve.timestamp[:19] }}</td>
-                            <td>
-                                <button class="btn btn-sm btn-danger delete-solve-btn" data-solve-index="{{ loop.index0 }}">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <script id="solves-data" type="application/json">{{ solves | tojson | safe }}</script>
-    <script src="/static/js/stats.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            try {
-                const solvesDataElement = document.getElementById('solves-data');
-                const solvesData = JSON.parse(solvesDataElement.textContent);
-                initializeStatsPage(solvesData);
-            } catch (error) {
-                console.error('Failed to load solves data:', error);
-                initializeStatsPage([]);
-            }
-        });
-    </script>
-</body>
-</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statistics - SpeedCubeStudio</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/static/js/global-settings.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="nav-title-link">
+                <h1 class="nav-title">SpeedCubeStudio</h1>
+            </a>
+            <div class="nav-user">
+                <span>Welcome, {{ current_user.id }}!</span>
+                <a href="/timer" class="nav-link"><i class="fas fa-stopwatch"></i> Timer</a>
+                <a href="/solver" class="nav-link"><i class="fas fa-magic"></i> Solver</a>
+                <a href="/stats" class="nav-link"><i class="fas fa-chart-line"></i> Stats</a>
+                <a href="/settings" class="nav-link"><i class="fas fa-cog"></i> Settings</a>
+                <a href="/logout" class="nav-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="stats-header">
+            <h2><i class="fas fa-chart-line"></i> Statistics</h2>
+            <div class="stats-summary">
+                <span>Total Solves: {{ stats.total_solves }}</span>
+            </div>
+        </div>
+
+        <!-- Main Statistics Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Best Single</div>
+                <div class="stat-value best">{{ stats.best_single }}</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-label">Worst Single</div>
+                <div class="stat-value worst">{{ stats.worst_single }}</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-label">Session Mean</div>
+                <div class="stat-value">{{ stats.session_mean }}</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-label">Mean of 3 (Mo3)</div>
+                <div class="stat-value">{{ stats.mo3 }}</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-label">Average of 5 (Ao5)</div>
+                <div class="stat-value">{{ stats.ao5 }}</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-label">Average of 12 (Ao12)</div>
+                <div class="stat-value">{{ stats.ao12 }}</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-label">Average of 50 (Ao50)</div>
+                <div class="stat-value">{{ stats.ao50 }}</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-label">Average of 100 (Ao100)</div>
+                <div class="stat-value">{{ stats.ao100 }}</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-label">Average of 1000 (Ao1000)</div>
+                <div class="stat-value">{{ stats.ao1000 }}</div>
+            </div>
+        </div>
+
+        <!-- Target Times Section -->
+        <div class="targets-section">
+            <h3><i class="fas fa-target"></i> Target Times</h3>
+            <div class="targets-grid">
+                <div class="target-card">
+                    <div class="target-label">Sub-10 Progress</div>
+                    <div class="target-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill sub10" style="width: 0%"></div>
+                        </div>
+                        <span class="progress-text">0%</span>
+                    </div>
+                </div>
+                
+                <div class="target-card">
+                    <div class="target-label">Sub-15 Progress</div>
+                    <div class="target-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill sub15" style="width: 0%"></div>
+                        </div>
+                        <span class="progress-text">0%</span>
+                    </div>
+                </div>
+                
+                <div class="target-card">
+                    <div class="target-label">Sub-20 Progress</div>
+                    <div class="target-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill sub20" style="width: 0%"></div>
+                        </div>
+                        <span class="progress-text">0%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Times Chart Section -->
+        <div class="chart-section">
+            <h3><i class="fas fa-chart-line"></i> Times Progress</h3>
+            <div class="chart-container">
+                <canvas id="timesChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Recent Solves History -->
+        <div class="history-section">
+            <div class="history-header">
+                <h3><i class="fas fa-history"></i> Solve History</h3>
+                <div class="bulk-actions">
+                    <button id="select-all-btn" class="btn btn-secondary btn-sm">
+                        <i class="fas fa-check-square"></i> Select All
+                    </button>
+                    <button id="delete-selected-btn" class="btn btn-warning btn-sm" disabled>
+                        <i class="fas fa-trash"></i> Delete Selected
+                    </button>
+                    <button id="delete-all-btn" class="btn btn-danger btn-sm">
+                        <i class="fas fa-trash-alt"></i> Delete All Solves
+                    </button>
+                </div>
+            </div>
+            <div class="solves-table-container">
+                <table class="solves-table">
+                    <thead>
+                        <tr>
+                            <th>
+                                <input type="checkbox" id="selectAllCheckbox" title="Select/Deselect All">
+                            </th>
+                            <th>#</th>
+                            <th>Time</th>
+                            <th>Scramble</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for solve in solves[-50:] %}
+                        <tr class="solve-row {% if solve.dnf %}dnf{% elif solve.plus2 %}plus2{% endif %}">
+                            <td>
+                                <input type="checkbox" class="solve-checkbox" data-solve-index="{{ loop.index0 }}">
+                            </td>
+                            <td>{{ loop.revindex }}</td>
+                            <td class="solve-time">
+                                {% if solve.dnf %}
+                                    DNF({{ "%.2f"|format(solve.time) }})
+                                {% elif solve.plus2 %}
+                                    {{ "%.2f"|format(solve.time + 2) }}+
+                                {% else %}
+                                    {{ "%.2f"|format(solve.time) }}
+                                {% endif %}
+                            </td>
+                            <td class="scramble-cell">{{ solve.scramble[:30] }}{% if solve.scramble|length > 30 %}...{% endif %}</td>
+                            <td>{{ solve.timestamp[:19] }}</td>
+                            <td>
+                                <button class="btn btn-sm btn-danger delete-solve-btn" data-solve-index="{{ loop.index0 }}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script id="solves-data" type="application/json">{{ solves | tojson | safe }}</script>
+    <script src="/static/js/stats.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                const solvesDataElement = document.getElementById('solves-data');
+                const solvesData = JSON.parse(solvesDataElement.textContent);
+                initializeStatsPage(solvesData);
+            } catch (error) {
+                console.error('Failed to load solves data:', error);
+                initializeStatsPage([]);
+            }
+        });
+    </script>
+</body>
+</html>
